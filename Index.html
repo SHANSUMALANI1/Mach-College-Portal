@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Portal - Government Boys Degree College Mach</title>
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+    box-sizing: border-box;
+    transition: all 0.25s ease;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #2d3748;
+}
+
+.container {
+    width: 100%;
+    max-width: 650px;
+    background: #ffffff;
+    padding: 28px;
+    border-radius: 18px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+    position: relative;
+    overflow: hidden;
+}
+
+.college-banner {
+    width: 100%;
+    height: 160px;
+    border-radius: 14px;
+    object-fit: cover;
+    object-position: 50% 20%;
+    margin-bottom: 18px;
+}
+
+.college-header {
+    text-align: center;
+    margin-bottom: 22px;
+    border-bottom: 1px solid #edf2f7;
+    padding-bottom: 16px;
+}
+
+.college-header img.logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 8px;
+    border: 3px solid #10b981;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+}
+
+.college-header h2 {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+h2, h3 {
+    font-family: 'Poppins', sans-serif;
+    color: #0f172a;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 14px 16px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: 1.5px solid #cbd5e1;
+    font-size: 15px;
+    outline: none;
+    background: #f8fafc;
+    font-family: inherit;
+}
+
+input:focus, textarea:focus {
+    border-color: #10b981;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+button:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-1px);
+}
+
+.btn-logout {
+    background: #ef4444;
+    font-size: 12px;
+    padding: 6px 12px;
+    width: auto;
+    margin-top: 0;
+    box-shadow: none;
+}
+
+.btn-logout:hover {
+    background: #dc2626;
+}
+
+.hidden {
+    display: none;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 10px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: #f1f5f9;
+    color: #475569;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: none;
+    margin-top: 0;
+}
+
+.tab-btn.active {
+    background: #10b981;
+    color: white;
+}
+
+.pdf-card {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pdf-info h4 {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+    color: #1e293b;
+}
+
+.pdf-info p {
+    margin: 0;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.pdf-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-small {
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: 600;
+    margin-top: 0;
+    width: auto;
+    cursor: pointer;
+}
+
+.btn-view {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-download {
+    background: #10b981;
+    color: white;
+}
+
+.chat-box {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    background: #f8fafc;
+    margin-bottom: 12px;
+}
+
+.chat-msg {
+    background: white;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    border: 1px solid #edf2f7;
+}
+
+.chat-msg .author {
+    font-weight: 700;
+    font-size: 12px;
+    color: #10b981;
+}
+
+.chat-msg .text {
+    font-size: 14px;
+    margin-top: 2px;
+    color: #334155;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- College Banner Image -->
+<img class="college-banner" src="https://lh3.googleusercontent.com/grass-cs/AABkmLeOd9iYRJMOk4zzKXJu5e_XrGHRmLO6nvDt30--T9reicExKGSqOMg2dB-gCwxSNrGf4rKtUDvyaHKQ3Hxl2kSj9h1jwYxnZHA5ywXgYyKEf8rbs_j6UodbFxrnplkKJ8HqrO4Q=w1200-h600-k-no" alt="Govt Boys Degree College Mach Building">
+
+<!-- College Header -->
+<div class="college-header">
+    <img class="logo" src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png" alt="College Logo">
+    <h2>Government Boys Degree College Mach</h2>
+</div>
+
+<!-- Login Screen -->
+<div id="loginDiv">
+<h2>Student Resource Portal</h2>
+<input id="name" placeholder="Full Name">
+<input id="roll" placeholder="Roll No">
+<button onclick="loginPortal()">Access Portal</button>
+</div>
+
+<!-- Portal Screen -->
+<div id="portalDiv" class="hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <span id="userWelcome" style="font-weight:600; color:#1e293b;"></span>
+        <button class="btn-logout" onclick="logoutPortal()">Logout</button>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('notes')">📚 Study Notes</button>
+        <button class="tab-btn" onclick="switchTab('discussion')">💬 Discussion</button>
+    </div>
+
+    <!-- Section 1: PDF Notes Portion -->
+    <div id="notesTab">
+        <h3>Class Notes & PDF Material</h3>
+        
+        <!-- PDF Item 1 -->
+        <div class="pdf-card">
+            <div class="pdf-info">
+                <h4>Computer Science Chapter 1.pdf</h4>
+                <p>Size: 2.4 MB | Added: Oct 2026</p>
+            </div>
+            <div class="pdf-actions">
+                <a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" onclick="trackView('Computer Science Chapter 1.pdf')" class="btn-small btn-view">View</a>
+                <a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" download onclick="trackDownload('Computer Science Chapter 1.pdf')" class="btn-small btn-download">Download</a>
+            </div>
+        </div>
+
+        <!-- PDF Item 2 -->
+        <div class="pdf-card">
+            <div class="pdf-info">
+                <h4>English Grammar & Essay Guide.pdf</h4>
+                <p>Size: 1.8 MB | Added: Oct 2026</p>
+            </div>
+            <div class="pdf-actions">
+                <a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" onclick="trackView('English Grammar Guide.pdf')" class="btn-small btn-view">View</a>
+                <a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" download onclick="trackDownload('English Grammar Guide.pdf')" class="btn-small btn-download">Download</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Group Discussion Portion -->
+    <div id="discussionTab" class="hidden">
+        <h3>Group Discussion & Query Box</h3>
+        <div class="chat-box" id="chatBox">
+            <div class="chat-msg">
+                <div class="author">Admin / Teacher</div>
+                <div class="text">Welcome to the discussion forum! Feel free to ask any question regarding your notes.</div>
+            </div>
+        </div>
+
+        <textarea id="msgInput" rows="2" placeholder="Type your message or query here..."></textarea>
+        <button onclick="postMessage()">Send Message</button>
+    </div>
+</div>
+
+</div>
+
+<script>
+let sheetURL = "https://script.google.com/macros/s/AKfycbxVmM8D96SW2S9VvuBhsO7leX9avwsKfmTbI3bCBuswvPF10O50DM_3Goi4N9gj1P3sfQ/exec";
+let studentName = "", studentRoll = "";
+
+// Auto login check on page load
+window.onload = function() {
+    let savedName = localStorage.getItem('mach_student_name');
+    let savedRoll = localStorage.getItem('mach_student_roll');
+
+    if (savedName && savedRoll) {
+        studentName = savedName;
+        studentRoll = savedRoll;
+        
+        document.getElementById('userWelcome').innerText = `👤 ${studentName} (${studentRoll})`;
+        document.getElementById('loginDiv').classList.add('hidden');
+        document.getElementById('portalDiv').classList.remove('hidden');
+        loadPreviousChats();
+    }
+};
+
+function sendDataToSheet(params) {
+    fetch(sheetURL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams(params).toString()
+    }).catch(e => console.log("Tracking Error:", e));
+}
+
+function loginPortal() {
+    studentName = document.getElementById('name').value.trim();
+    studentRoll = document.getElementById('roll').value.trim();
+    if(!studentName || !studentRoll) { alert("Name and Roll No required"); return; }
+
+    localStorage.setItem('mach_student_name', studentName);
+    localStorage.setItem('mach_student_roll', studentRoll);
+
+    document.getElementById('userWelcome').innerText = `👤 ${studentName} (${studentRoll})`;
+    document.getElementById('loginDiv').classList.add('hidden');
+    document.getElementById('portalDiv').classList.remove('hidden');
+
+    sendDataToSheet({
+        action: "login",
+        name: studentName,
+        roll: studentRoll
+    });
+    
+    loadPreviousChats();
+}
+
+function logoutPortal() {
+    localStorage.removeItem('mach_student_name');
+    localStorage.removeItem('mach_student_roll');
+    location.reload();
+}
+
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    if(tab === 'notes') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('notesTab').classList.remove('hidden');
+        document.getElementById('discussionTab').classList.add('hidden');
+    } else {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('notesTab').classList.add('hidden');
+        document.getElementById('discussionTab').classList.remove('hidden');
+        loadPreviousChats();
+    }
+}
+
+function loadPreviousChats() {
+    fetch(`${sheetURL}?action=getChats`)
+    .then(res => res.json())
+    .then(data => {
+        let chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML = `
+            <div class="chat-msg">
+                <div class="author">Admin / Teacher</div>
+                <div class="text">Welcome to the discussion forum! Feel free to ask any question regarding your notes.</div>
+            </div>
+        `;
+        if (Array.isArray(data)) {
+            data.forEach(item => {
+                let div = document.createElement('div');
+                div.className = 'chat-msg';
+                div.innerHTML = `<div class="author">${item.name} (${item.roll})</div><div class="text">${item.message}</div>`;
+                chatBox.appendChild(div);
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    })
+    .catch(e => console.log("Chat fetch error:", e));
+}
+
+function trackDownload(pdfName) {
+    sendDataToSheet({
+        action: "download",
+        name: studentName,
+        roll: studentRoll,
+        pdfName: pdfName
+    });
+}
+
+function trackView(pdfName) {
+    sendDataToSheet({
+        action: "view",
+        name: studentName,
+        roll: studentRoll,
+        pdfName: pdfName
+    });
+}
+
+function postMessage() {
+    let msg = document.getElementById('msgInput').value.trim();
+    if(!msg) return;
+
+    let chatBox = document.getElementById('chatBox');
+    let div = document.createElement('div');
+    div.className = 'chat-msg';
+    div.innerHTML = `<div class="author">${studentName} (${studentRoll})</div><div class="text">${msg}</div>`;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    
+    sendDataToSheet({
+        action: "chat",
+        name: studentName,
+        roll: studentRoll,
+        message: msg
+    });
+
+    document.getElementById('msgInput').value = "";
+}
+</script>
+</body>
+</html>
