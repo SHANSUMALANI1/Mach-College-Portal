@@ -335,25 +335,53 @@ function sendDataToSheet(params) {
 }
 
 function loginPortal() {
-    studentName = document.getElementById('name').value.trim();
-    studentRoll = document.getElementById('roll').value.trim();
-    if(!studentName || !studentRoll) { alert("Name and Roll No required"); return; }
-
-    localStorage.setItem('mach_student_name', studentName);
-    localStorage.setItem('mach_student_roll', studentRoll);
-
-    document.getElementById('userWelcome').innerText = `👤 ${studentName} (${studentRoll})`;
-    document.getElementById('loginDiv').classList.add('hidden');
-    document.getElementById('portalDiv').classList.remove('hidden');
-
-    sendDataToSheet({
-        action: "login",
-        name: studentName,
-        roll: studentRoll
-    });
+    let nameInput = document.getElementById('name').value.trim();
+    let rollInput = document.getElementById('roll').value.trim();
     
-    loadNotesFromSheet();
-    loadPreviousChats();
+    if(!nameInput || !rollInput) { 
+        alert("Please enter both Name and Roll No"); 
+        return; 
+    }
+
+    // Show loading feedback
+    let loginBtn = event.target;
+    loginBtn.innerText = "Verifying...";
+
+    // Query the backend to verify enrollment
+    fetch(`${sheetURL}?action=verifyLogin&roll=${encodeURIComponent(rollInput)}&name=${encodeURIComponent(nameInput)}`)
+    .then(res => res.json())
+    .then(data => {
+        loginBtn.innerText = "Access Portal";
+        
+        if (data.status === "success") {
+            studentName = nameInput;
+            studentRoll = rollInput;
+
+            localStorage.setItem('mach_student_name', studentName);
+            localStorage.setItem('mach_student_roll', studentRoll);
+
+            document.getElementById('userWelcome').innerText = `👤 ${studentName} (${studentRoll})`;
+            document.getElementById('loginDiv').classList.add('hidden');
+            document.getElementById('portalDiv').classList.remove('hidden');
+
+            // Log the successful login event
+            sendDataToSheet({
+                action: "login",
+                name: studentName,
+                roll: studentRoll
+            });
+            
+            loadNotesFromSheet();
+            loadPreviousChats();
+        } else {
+            alert("Access Denied: Roll number not found in the college roster. Please check your details or contact the administrator.");
+        }
+    })
+    .catch(e => {
+        loginBtn.innerText = "Access Portal";
+        console.log("Login Verification Error:", e);
+        alert("Connection error. Please try again.");
+    });
 }
 
 function logoutPortal() {
