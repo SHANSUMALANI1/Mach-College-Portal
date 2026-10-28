@@ -336,9 +336,11 @@ window.onload = function() {
         document.getElementById('loginDiv').classList.add('hidden');
         document.getElementById('portalDiv').classList.remove('hidden');
         loadPreviousChats();
+
+        // Automatically fetch new chat messages every 5 seconds
+        setInterval(loadPreviousChats, 5000);
     }
 };
-
 function sendDataToSheet(params) {
     fetch(sheetURL, {
         method: "POST",
