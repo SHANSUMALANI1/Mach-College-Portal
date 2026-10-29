@@ -386,36 +386,48 @@ button:active {
     </div>
 </div>
 
-<!-- Admin Login Modal / View -->
+<!-- Teacher Login Modal / View -->
 <div id="adminLoginDiv" class="hidden">
-    <h3 style="font-size:16px; margin-bottom:8px; color:#059669;">Admin / Teacher Authentication</h3>
-    <p style="font-size:12px; color:#64748b; margin-top:0; margin-bottom:12px;">Enter admin password to publish notes and notices.</p>
-    <input type="password" id="adminPassInput" placeholder="Enter Admin Password">
-    <button onclick="verifyAdminLogin()">Login as Admin</button>
+    <h3 style="font-size:16px; margin-bottom:8px; color:#059669;">Teacher / Admin Authentication</h3>
+    <p style="font-size:12px; color:#64748b; margin-top:0; margin-bottom:12px;">Enter your teacher name and official password from the Teacher sheet.</p>
+    <input id="adminNameInput" placeholder="Teacher Name">
+    <input type="password" id="adminPassInput" placeholder="Password">
+    <button id="adminLoginBtn" onclick="verifyAdminLogin()">Login as Teacher</button>
     <button class="btn-secondary" onclick="backToStudentLogin()">Back to Student Login</button>
 </div>
 
 <!-- Admin Dashboard Screen -->
 <div id="adminDashboardDiv" class="hidden">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; background:#ecfdf5; padding:8px 12px; border-radius:10px;">
-        <span style="font-weight:600; font-size:13px; color:#065f46;">🛠️ Admin Control Panel</span>
+        <span id="teacherWelcome" style="font-weight:600; font-size:13px; color:#065f46;">🛠️ Teacher Control Panel</span>
         <button class="btn-logout" onclick="logoutAdmin()">Exit Admin</button>
     </div>
 
+    <!-- Direct PDF File Upload Section -->
     <div class="admin-card">
-        <h4 style="margin:0 0 8px 0; font-size:14px; color:#065f46;">➕ Upload New Study Note</h4>
-        <input id="newNoteTitle" placeholder="PDF Title (e.g., Physics Chapter 2.pdf)">
-        <input id="newNoteInfo" placeholder="Details (e.g., Size: 2.1 MB | Added: Oct 2026)">
-        <input id="newNoteLink" placeholder="Google Drive or PDF Share Link">
-        <button onclick="submitNewNote()">Publish Note to Sheet</button>
+        <h4 style="margin:0 0 8px 0; font-size:14px; color:#065f46;">📁 Upload PDF File Directly</h4>
+        <input id="uploadNoteTitle" placeholder="PDF Title (e.g., Physics Chapter 2.pdf)">
+        <input id="uploadNoteInfo" placeholder="Details (e.g., Size: 2.1 MB | Added: Oct 2026)">
+        <input type="file" id="pdfFileInput" accept="application/pdf" style="background:white; padding:10px;">
+        <button onclick="uploadPDFNote()">Upload & Publish PDF</button>
     </div>
 
+    <!-- External Link Option -->
+    <div class="admin-card">
+        <h4 style="margin:0 0 8px 0; font-size:14px; color:#065f46;">🔗 Add Note via Shareable Link</h4>
+        <input id="newNoteTitle" placeholder="PDF Title (e.g., Chemistry Notes)">
+        <input id="newNoteInfo" placeholder="Details (e.g., Unit 1)">
+        <input id="newNoteLink" placeholder="Google Drive or PDF Share Link">
+        <button onclick="submitNewNote()">Publish Link Note</button>
+    </div>
+
+    <!-- Notice Publishing Option -->
     <div class="admin-card">
         <h4 style="margin:0 0 8px 0; font-size:14px; color:#065f46;">📢 Post Campus Notice</h4>
         <input id="newNoticeTitle" placeholder="Notice Title (e.g., Mid-Term Exam Schedule)">
         <input id="newNoticeDate" placeholder="Date (e.g., Oct 30, 2026)">
         <textarea id="newNoticeContent" rows="2" placeholder="Notice details..."></textarea>
-        <button onclick="submitNewNotice()">Publish Notice to Sheet</button>
+        <button onclick="submitNewNotice()">Publish Notice</button>
     </div>
 </div>
 
@@ -474,11 +486,11 @@ button:active {
 <div id="toast" class="toast">Action notification</div>
 
 <script>
-let sheetURL = "https://script.google.com/macros/s/AKfycbzfaigXifegY_m3zRy4xgPfSNnvWzX35Fhs7JtfWExS0XVqLyog_ShfmxCRlk0PGSQDNQ/exec";
+let sheetURL = "https://script.google.com/macros/s/AKfycbwIc0PyB0XxYhXLAQF-D3S5xO75c46yNO9qBJwODMKL3nfF11TcgrcpjBlJPAohsXtkbQ/exec";
 let studentName = "", studentRoll = "";
+let teacherName = "";
 let allNotesData = [];
 
-// Show Toast Alert
 function showToast(msg) {
     let t = document.getElementById('toast');
     t.innerText = msg;
@@ -486,16 +498,16 @@ function showToast(msg) {
     setTimeout(() => { t.classList.remove('show'); }, 3000);
 }
 
-// Update Character Counter
 function updateCharCount() {
     let len = document.getElementById('msgInput').value.length;
     document.getElementById('charNum').innerText = len;
 }
 
-// Auto login check on page load
 window.onload = function() {
-    let savedAdmin = localStorage.getItem('mach_admin_logged');
-    if (savedAdmin === 'true') {
+    let savedTeacher = localStorage.getItem('mach_teacher_name');
+    if (savedTeacher) {
+        teacherName = savedTeacher;
+        document.getElementById('teacherWelcome').innerText = `🛠️ Welcome, ${teacherName}`;
         document.getElementById('loginDiv').classList.add('hidden');
         document.getElementById('adminDashboardDiv').classList.remove('hidden');
         return;
@@ -590,7 +602,6 @@ function logoutPortal() {
     location.reload();
 }
 
-// Admin Navigation Functions
 function openAdminLogin() {
     document.getElementById('loginDiv').classList.add('hidden');
     document.getElementById('adminLoginDiv').classList.remove('hidden');
@@ -602,21 +613,79 @@ function backToStudentLogin() {
 }
 
 function verifyAdminLogin() {
+    let name = document.getElementById('adminNameInput').value.trim();
     let pass = document.getElementById('adminPassInput').value.trim();
-    // Default master passkey: mach2026 (you can change this password anytime here)
-    if (pass === "mach2026") {
-        localStorage.setItem('mach_admin_logged', 'true');
-        document.getElementById('adminLoginDiv').classList.add('hidden');
-        document.getElementById('adminDashboardDiv').classList.remove('hidden');
-        showToast("Admin Logged In Successfully");
-    } else {
-        showToast("Incorrect Admin Password");
+
+    if(!name || !pass) {
+        showToast("Enter both Teacher Name and Password");
+        return;
     }
+
+    let btn = document.getElementById('adminLoginBtn');
+    btn.innerText = "Verifying Credentials...";
+    btn.disabled = true;
+
+    fetch(`${sheetURL}?action=verifyTeacher&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}`)
+    .then(res => res.json())
+    .then(data => {
+        btn.innerText = "Login as Teacher";
+        btn.disabled = false;
+
+        if (data.status === "success") {
+            teacherName = data.teacherName || name;
+            localStorage.setItem('mach_teacher_name', teacherName);
+            document.getElementById('teacherWelcome').innerText = `🛠️ Welcome, ${teacherName}`;
+            document.getElementById('adminLoginDiv').classList.add('hidden');
+            document.getElementById('adminDashboardDiv').classList.remove('hidden');
+            showToast("Authenticated Successfully!");
+        } else {
+            showToast("Access Denied: Invalid Teacher credentials.");
+        }
+    })
+    .catch(e => {
+        btn.innerText = "Login as Teacher";
+        btn.disabled = false;
+        showToast("Connection error. Try again.");
+    });
 }
 
 function logoutAdmin() {
-    localStorage.removeItem('mach_admin_logged');
+    localStorage.removeItem('mach_teacher_name');
     location.reload();
+}
+
+function uploadPDFNote() {
+    let title = document.getElementById('uploadNoteTitle').value.trim();
+    let info = document.getElementById('uploadNoteInfo').value.trim();
+    let fileInput = document.getElementById('pdfFileInput');
+
+    if(!title || fileInput.files.length === 0) {
+        showToast("Enter title and select a PDF file");
+        return;
+    }
+
+    let file = fileInput.files[0];
+    showToast("Uploading PDF to Google Drive...");
+
+    let reader = new FileReader();
+    reader.onload = function(e) {
+        let base64Data = e.target.result;
+        
+        sendDataToSheet({
+            action: "uploadPDF",
+            title: title,
+            info: info || `Size: ${(file.size / (1024*1024)).toFixed(1)} MB | Added by ${teacherName}`,
+            fileName: file.name,
+            fileType: file.type,
+            fileData: base64Data
+        });
+
+        showToast("PDF Uploaded & Published!");
+        document.getElementById('uploadNoteTitle').value = "";
+        document.getElementById('uploadNoteInfo').value = "";
+        fileInput.value = "";
+    };
+    reader.readAsDataURL(file);
 }
 
 function submitNewNote() {
@@ -632,7 +701,7 @@ function submitNewNote() {
     sendDataToSheet({
         action: "addNote",
         title: title,
-        info: info || "Size: N/A | Added: Recent",
+        info: info || `Added by ${teacherName}`,
         link: link
     });
 
