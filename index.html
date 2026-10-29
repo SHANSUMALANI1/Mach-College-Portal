@@ -2,64 +2,66 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Student Portal - Government Boys Degree College Mach</title>
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
 
 <style>
 * {
     box-sizing: border-box;
-    transition: all 0.25s ease;
+    transition: all 0.2s ease-in-out;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+    background: #f1f5f9;
     min-height: 100vh;
     margin: 0;
-    padding: 20px 15px;
+    padding: 12px 10px;
     display: flex;
     justify-content: center;
-    align-items: center;
-    color: #2d3748;
+    align-items: flex-start;
+    color: #1e293b;
 }
 
 .container {
     width: 100%;
     max-width: 650px;
     background: #ffffff;
-    padding: 28px;
-    border-radius: 18px;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     position: relative;
     overflow: hidden;
+    margin-top: 5px;
 }
 
 .college-banner {
     width: 100%;
-    height: 160px;
+    height: 140px;
     border-radius: 14px;
     object-fit: cover;
     object-position: 50% 20%;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
 }
 
 .college-header {
     text-align: center;
-    margin-bottom: 22px;
-    border-bottom: 1px solid #edf2f7;
-    padding-bottom: 16px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 14px;
 }
 
 .college-header img.logo {
-    width: 64px;
-    height: 64px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     object-fit: cover;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     border: 3px solid #10b981;
     box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
 }
@@ -67,23 +69,32 @@ body {
 .college-header h2 {
     margin: 0;
     font-family: 'Poppins', sans-serif;
-    font-size: 19px;
+    font-size: 18px;
     font-weight: 700;
-    color: #1e293b;
+    color: #0f172a;
+    line-height: 1.3;
+}
+
+.sub-tagline {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 3px;
+    font-weight: 500;
 }
 
 h2, h3 {
     font-family: 'Poppins', sans-serif;
     color: #0f172a;
+    margin-top: 0;
 }
 
 input, textarea {
     width: 100%;
-    padding: 14px 16px;
-    margin: 10px 0;
+    padding: 13px 15px;
+    margin: 8px 0;
     border-radius: 10px;
     border: 1.5px solid #cbd5e1;
-    font-size: 15px;
+    font-size: 14px;
     outline: none;
     background: #f8fafc;
     font-family: inherit;
@@ -97,60 +108,59 @@ input:focus, textarea:focus {
 
 button {
     width: 100%;
-    padding: 14px;
+    padding: 13px;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
     border: none;
     border-radius: 12px;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     font-family: 'Poppins', sans-serif;
     cursor: pointer;
-    margin-top: 10px;
+    margin-top: 8px;
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 }
 
-button:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
-    transform: translateY(-1px);
+button:active {
+    transform: scale(0.98);
 }
 
 .btn-logout {
     background: #ef4444;
-    font-size: 12px;
+    font-size: 11px;
     padding: 6px 12px;
     width: auto;
     margin-top: 0;
     box-shadow: none;
-}
-
-.btn-logout:hover {
-    background: #dc2626;
+    border-radius: 8px;
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .tabs {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 10px;
+    gap: 6px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 8px;
+    overflow-x: auto;
 }
 
 .tab-btn {
     flex: 1;
     background: #f1f5f9;
     color: #475569;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 10px 8px;
+    border-radius: 10px;
     border: none;
     font-weight: 600;
+    font-size: 12px;
     cursor: pointer;
     box-shadow: none;
     margin-top: 0;
+    white-space: nowrap;
 }
 
 .tab-btn.active {
@@ -158,43 +168,80 @@ button:hover {
     color: white;
 }
 
+.search-box {
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.search-box input {
+    padding-left: 36px;
+    margin: 0;
+    font-size: 13px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 14px;
+}
+
 .pdf-card {
-    background: #f8fafc;
+    background: #ffffff;
     border: 1.5px solid #e2e8f0;
-    padding: 16px;
+    padding: 14px;
     border-radius: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+}
+
+@media(min-width: 480px) {
+    .pdf-card {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
 }
 
 .pdf-info h4 {
     margin: 0 0 4px 0;
-    font-size: 15px;
+    font-size: 14px;
     color: #1e293b;
+    line-height: 1.3;
 }
 
 .pdf-info p {
     margin: 0;
-    font-size: 12px;
+    font-size: 11px;
     color: #64748b;
 }
 
 .pdf-actions {
     display: flex;
     gap: 8px;
+    width: 100%;
+}
+
+@media(min-width: 480px) {
+    .pdf-actions {
+        width: auto;
+    }
 }
 
 .btn-small {
+    flex: 1;
     padding: 8px 12px;
-    font-size: 13px;
+    font-size: 12px;
     border-radius: 8px;
     text-decoration: none;
     display: inline-block;
     font-weight: 600;
     margin-top: 0;
-    width: auto;
+    text-align: center;
     cursor: pointer;
 }
 
@@ -209,33 +256,94 @@ button:hover {
 }
 
 .chat-box {
-    max-height: 250px;
+    height: 260px;
     overflow-y: auto;
     border: 1.5px solid #e2e8f0;
     border-radius: 12px;
-    padding: 12px;
+    padding: 10px;
     background: #f8fafc;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .chat-msg {
     background: white;
-    padding: 10px 12px;
+    padding: 8px 11px;
     border-radius: 10px;
     margin-bottom: 8px;
     border: 1px solid #edf2f7;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
 
 .chat-msg .author {
     font-weight: 700;
-    font-size: 12px;
+    font-size: 11px;
     color: #10b981;
+    display: flex;
+    justify-content: space-between;
 }
 
 .chat-msg .text {
-    font-size: 14px;
-    margin-top: 2px;
+    font-size: 13px;
+    margin-top: 3px;
     color: #334155;
+    word-break: break-word;
+}
+
+.notice-card {
+    background: #fffbe0;
+    border-left: 4px solid #f59e0b;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.notice-card h4 {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    color: #b45309;
+}
+
+.notice-card p {
+    margin: 0;
+    font-size: 12px;
+    color: #78350f;
+}
+
+.notice-date {
+    font-size: 10px;
+    color: #a16207;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.toast.show {
+    opacity: 1;
+}
+
+.char-counter {
+    font-size: 10px;
+    color: #94a3b8;
+    text-align: right;
+    margin-top: -6px;
+    margin-bottom: 6px;
 }
 </style>
 </head>
@@ -244,63 +352,96 @@ button:hover {
 <div class="container">
 
 <!-- College Banner Image -->
-<img class="college-banner" src="https://lh3.googleusercontent.com/grass-cs/AABkmLeOd9iYRJMOk4zzKXJu5e_XrGHRmLO6nvDt30--T9reicExKGSqOMg2dB-gCwxSNrGf4rKtUDvyaHKQ3Hxl2kSj9h1jwYxnZHA5ywXgYyKEf8rbs_j6UodbFxrnplkKJ8HqrO4Q=w1200-h600-k-no" alt="Govt Boys Degree College Mach Building">
+<img class="college-banner" src="https://lh3.googleusercontent.com/grass-cs/AABkmLeOd9iYRJMOk4zzKXJu5e_XrGHRmLO6nvDt30--T9reicExKGSqOMg2dB-gCwxSNrGf4rKtUDvyaHKQ3Hxl2kSj9h1jwYxnZHA5ywXgYyKEf8rbs_j6UodbFxrnplkKJ8HqrO4Q=w1200-h600-k-no" alt="Govt Boys Degree College Mach">
 
 <!-- College Header -->
 <div class="college-header">
     <img class="logo" src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png" alt="College Logo">
     <h2>Government Boys Degree College Mach</h2>
+    <div class="sub-tagline">Official Digital Student Resource Portal</div>
 </div>
 
 <!-- Login Screen -->
 <div id="loginDiv">
-<h2>Student Resource Portal</h2>
-<input id="name" placeholder="Full Name">
-<input id="roll" placeholder="Roll No">
-<button onclick="loginPortal()">Access Portal</button>
+<h3 style="font-size:16px; margin-bottom:8px;">Student Authentication</h3>
+<p style="font-size:12px; color:#64748b; margin-top:0; margin-bottom:12px;">Enter your credentials verified in the official roster list.</p>
+<input id="name" placeholder="Full Student Name">
+<input id="roll" placeholder="Official Roll No (e.g., 101)">
+<button id="loginBtn" onclick="loginPortal()">Access Portal</button>
 </div>
 
 <!-- Portal Screen -->
 <div id="portalDiv" class="hidden">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <span id="userWelcome" style="font-weight:600; color:#1e293b;"></span>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; background:#f8fafc; padding:8px 12px; border-radius:10px;">
+        <span id="userWelcome" style="font-weight:600; font-size:13px; color:#1e293b;"></span>
         <button class="btn-logout" onclick="logoutPortal()">Logout</button>
     </div>
 
     <!-- Navigation Tabs -->
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('notes')">📚 Study Notes</button>
+        <button class="tab-btn active" onclick="switchTab('notes')">📚 Notes</button>
+        <button class="tab-btn" onclick="switchTab('notices')">📢 Notices</button>
         <button class="tab-btn" onclick="switchTab('discussion')">💬 Discussion</button>
     </div>
 
-    <!-- Section 1: Dynamic PDF Notes Portion -->
+    <!-- Section 1: Study Notes Portion -->
     <div id="notesTab">
-        <h3>Class Notes & PDF Material</h3>
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input id="searchInput" onkeyup="filterNotes()" placeholder="Search chapter, subject or title...">
+        </div>
         <div id="notesListContainer">
-            <p style="color:#64748b;">Loading latest study notes...</p>
+            <p style="color:#64748b; font-size:13px; text-align:center;">Loading latest study notes...</p>
         </div>
     </div>
 
-    <!-- Section 2: Group Discussion Portion -->
+    <!-- Section 2: Notices Portion -->
+    <div id="noticesTab" class="hidden">
+        <h3 style="font-size:15px;">Campus Announcements</h3>
+        <div id="noticesContainer">
+            <p style="color:#64748b; font-size:13px; text-align:center;">Loading latest campus notices...</p>
+        </div>
+    </div>
+
+    <!-- Section 3: Discussion Portion -->
     <div id="discussionTab" class="hidden">
-        <h3>Group Discussion & Query Box</h3>
+        <h3 style="font-size:15px; margin-bottom:8px;">Live Student Forum</h3>
         <div class="chat-box" id="chatBox">
             <div class="chat-msg">
-                <div class="author">Admin / Teacher</div>
+                <div class="author"><span>Admin / Teacher</span></div>
                 <div class="text">Welcome to the discussion forum! Feel free to ask any question regarding your notes.</div>
             </div>
         </div>
 
-        <textarea id="msgInput" rows="2" placeholder="Type your message or query here..."></textarea>
+        <textarea id="msgInput" rows="2" maxlength="250" oninput="updateCharCount()" placeholder="Type your query or discussion note..."></textarea>
+        <div class="char-counter"><span id="charNum">0</span>/250</div>
         <button onclick="postMessage()">Send Message</button>
     </div>
 </div>
 
 </div>
 
+<!-- Toast Notification -->
+<div id="toast" class="toast">Action notification</div>
+
 <script>
-let sheetURL = "https://script.google.com/macros/s/AKfycbzh3RVnm9Edi1zibksMHCWKkQ5lVmU9akA8kBf4DmdbJsK54QMZTGT6-C4BxMSnbJiwoA/exec";
+let sheetURL = "https://script.google.com/macros/s/AKfycbyNTB1XkX0Rd_YavKILnHBygbcMBh9jhpNHG9x75vZUTXsOppPqnXpIYSJhow_N1qXt/exec";
 let studentName = "", studentRoll = "";
+let allNotesData = [];
+
+// Show Toast Alert
+function showToast(msg) {
+    let t = document.getElementById('toast');
+    t.innerText = msg;
+    t.classList.add('show');
+    setTimeout(() => { t.classList.remove('show'); }, 3000);
+}
+
+// Update Character Counter
+function updateCharCount() {
+    let len = document.getElementById('msgInput').value.length;
+    document.getElementById('charNum').innerText = len;
+}
 
 // Auto login check on page load
 window.onload = function() {
@@ -316,6 +457,7 @@ window.onload = function() {
         document.getElementById('portalDiv').classList.remove('hidden');
         
         loadNotesFromSheet();
+        loadAnnouncementsFromSheet();
         loadPreviousChats();
 
         // Automatically fetch new chat messages every 5 seconds
@@ -339,22 +481,23 @@ function loginPortal() {
     let rollInput = document.getElementById('roll').value.trim();
     
     if(!nameInput || !rollInput) { 
-        alert("Please enter both Name and Roll No"); 
+        showToast("Please enter both Name and Roll No"); 
         return; 
     }
 
-    // Show loading feedback
-    let loginBtn = event.target;
-    loginBtn.innerText = "Verifying...";
+    let loginBtn = document.getElementById('loginBtn');
+    loginBtn.innerText = "Verifying Enrollment...";
+    loginBtn.disabled = true;
 
-    // Query the backend to verify enrollment
+    // Verify student enrollment from "Students" tab
     fetch(`${sheetURL}?action=verifyLogin&roll=${encodeURIComponent(rollInput)}&name=${encodeURIComponent(nameInput)}`)
     .then(res => res.json())
     .then(data => {
         loginBtn.innerText = "Access Portal";
+        loginBtn.disabled = false;
         
         if (data.status === "success") {
-            studentName = nameInput;
+            studentName = data.verifiedName || nameInput;
             studentRoll = rollInput;
 
             localStorage.setItem('mach_student_name', studentName);
@@ -364,23 +507,26 @@ function loginPortal() {
             document.getElementById('loginDiv').classList.add('hidden');
             document.getElementById('portalDiv').classList.remove('hidden');
 
-            // Log the successful login event
             sendDataToSheet({
                 action: "login",
                 name: studentName,
                 roll: studentRoll
             });
             
+            showToast("Welcome to the Portal!");
             loadNotesFromSheet();
+            loadAnnouncementsFromSheet();
             loadPreviousChats();
+            setInterval(loadPreviousChats, 5000);
         } else {
-            alert("Access Denied: Roll number not found in the college roster. Please check your details or contact the administrator.");
+            showToast("Access Denied: Roll No not found in official roster.");
         }
     })
     .catch(e => {
         loginBtn.innerText = "Access Portal";
-        console.log("Login Verification Error:", e);
-        alert("Connection error. Please try again.");
+        loginBtn.disabled = false;
+        console.log("Login Error:", e);
+        showToast("Connection error. Try again.");
     });
 }
 
@@ -392,13 +538,19 @@ function logoutPortal() {
 
 function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('notesTab').classList.add('hidden');
+    document.getElementById('noticesTab').classList.add('hidden');
+    document.getElementById('discussionTab').classList.add('hidden');
+
     if(tab === 'notes') {
         document.querySelectorAll('.tab-btn')[0].classList.add('active');
         document.getElementById('notesTab').classList.remove('hidden');
-        document.getElementById('discussionTab').classList.add('hidden');
-    } else {
+    } else if(tab === 'notices') {
         document.querySelectorAll('.tab-btn')[1].classList.add('active');
-        document.getElementById('notesTab').classList.add('hidden');
+        document.getElementById('noticesTab').classList.remove('hidden');
+        loadAnnouncementsFromSheet();
+    } else {
+        document.querySelectorAll('.tab-btn')[2].classList.add('active');
         document.getElementById('discussionTab').classList.remove('hidden');
         loadPreviousChats();
     }
@@ -408,30 +560,77 @@ function loadNotesFromSheet() {
     fetch(`${sheetURL}?action=getNotes`)
     .then(res => res.json())
     .then(data => {
-        let container = document.getElementById('notesListContainer');
+        allNotesData = Array.isArray(data) ? data : [];
+        renderNotes(allNotesData);
+    })
+    .catch(e => {
+        console.log("Notes fetch error:", e);
+        document.getElementById('notesListContainer').innerHTML = "<p style='color:#ef4444; font-size:12px;'>Error loading study notes.</p>";
+    });
+}
+
+function renderNotes(notes) {
+    let container = document.getElementById('notesListContainer');
+    container.innerHTML = "";
+
+    if (notes.length > 0) {
+        notes.forEach(note => {
+            let card = document.createElement('div');
+            card.className = 'pdf-card';
+            card.innerHTML = `
+                <div class="pdf-info">
+                    <h4>📄 ${note.title}</h4>
+                    <p>${note.info || 'Official Course Material'}</p>
+                </div>
+                <div class="pdf-actions">
+                    <a href="${note.link}" target="_blank" onclick="trackView('${note.title}')" class="btn-small btn-view">View</a>
+                    <a href="${note.link}" download onclick="trackDownload('${note.title}')" class="btn-small btn-download">Download</a>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    } else {
+        container.innerHTML = "<p style='color:#64748b; font-size:12px; text-align:center;'>No matching notes found.</p>";
+    }
+}
+
+function filterNotes() {
+    let query = document.getElementById('searchInput').value.toLowerCase().trim();
+    let filtered = allNotesData.filter(n => 
+        n.title.toLowerCase().includes(query) || (n.info && n.info.toLowerCase().includes(query))
+    );
+    renderNotes(filtered);
+}
+
+function loadAnnouncementsFromSheet() {
+    fetch(`${sheetURL}?action=getAnnouncements`)
+    .then(res => res.json())
+    .then(data => {
+        let container = document.getElementById('noticesContainer');
         container.innerHTML = "";
 
         if (Array.isArray(data) && data.length > 0) {
-            data.forEach(note => {
+            data.forEach(item => {
                 let card = document.createElement('div');
-                card.className = 'pdf-card';
+                card.className = 'notice-card';
                 card.innerHTML = `
-                    <div class="pdf-info">
-                        <h4>${note.title}</h4>
-                        <p>${note.info}</p>
-                    </div>
-                    <div class="pdf-actions">
-                        <a href="${note.link}" target="_blank" onclick="trackView('${note.title}')" class="btn-small btn-view">View</a>
-                        <a href="${note.link}" download onclick="trackDownload('${note.title}')" class="btn-small btn-download">Download</a>
-                    </div>
+                    <span class="notice-date">🗓️ ${item.date || 'Recent'}</span>
+                    <h4>${item.title}</h4>
+                    <p>${item.content}</p>
                 `;
                 container.appendChild(card);
             });
         } else {
-            container.innerHTML = "<p style='color:#64748b;'>No notes available at the moment.</p>";
+            container.innerHTML = `
+                <div class="notice-card">
+                    <span class="notice-date">📌 Official Notice</span>
+                    <h4>Welcome to Govt Boys Degree College Mach Portal</h4>
+                    <p>Check back regularly for updates regarding class schedules, examination details, and new study materials.</p>
+                </div>
+            `;
         }
     })
-    .catch(e => console.log("Notes fetch error:", e));
+    .catch(e => console.log("Notices fetch error:", e));
 }
 
 function loadPreviousChats() {
@@ -441,7 +640,7 @@ function loadPreviousChats() {
         let chatBox = document.getElementById('chatBox');
         chatBox.innerHTML = `
             <div class="chat-msg">
-                <div class="author">Admin / Teacher</div>
+                <div class="author"><span>Admin / Teacher</span></div>
                 <div class="text">Welcome to the discussion forum! Feel free to ask any question regarding your notes.</div>
             </div>
         `;
@@ -449,7 +648,7 @@ function loadPreviousChats() {
             data.forEach(item => {
                 let div = document.createElement('div');
                 div.className = 'chat-msg';
-                div.innerHTML = `<div class="author">${item.name} (${item.roll})</div><div class="text">${item.message}</div>`;
+                div.innerHTML = `<div class="author"><span>${item.name} (${item.roll})</span></div><div class="text">${item.message}</div>`;
                 chatBox.appendChild(div);
             });
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -459,6 +658,7 @@ function loadPreviousChats() {
 }
 
 function trackDownload(pdfName) {
+    showToast(`Downloading: ${pdfName}`);
     sendDataToSheet({
         action: "download",
         name: studentName,
@@ -468,6 +668,7 @@ function trackDownload(pdfName) {
 }
 
 function trackView(pdfName) {
+    showToast(`Opening: ${pdfName}`);
     sendDataToSheet({
         action: "view",
         name: studentName,
@@ -477,13 +678,14 @@ function trackView(pdfName) {
 }
 
 function postMessage() {
-    let msg = document.getElementById('msgInput').value.trim();
+    let msgInput = document.getElementById('msgInput');
+    let msg = msgInput.value.trim();
     if(!msg) return;
 
     let chatBox = document.getElementById('chatBox');
     let div = document.createElement('div');
     div.className = 'chat-msg';
-    div.innerHTML = `<div class="author">${studentName} (${studentRoll})</div><div class="text">${msg}</div>`;
+    div.innerHTML = `<div class="author"><span>${studentName} (${studentRoll})</span></div><div class="text">${msg}</div>`;
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
     
@@ -494,7 +696,9 @@ function postMessage() {
         message: msg
     });
 
-    document.getElementById('msgInput').value = "";
+    msgInput.value = "";
+    updateCharCount();
+    showToast("Message Posted");
 }
 </script>
 </body>
