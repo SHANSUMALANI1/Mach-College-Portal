@@ -389,7 +389,7 @@ button:active {
 <!-- Teacher Login Modal / View -->
 <div id="adminLoginDiv" class="hidden">
     <h3 style="font-size:16px; margin-bottom:8px; color:#059669;">Teacher / Admin Authentication</h3>
-    <p style="font-size:12px; color:#64748b; margin-top:0; margin-bottom:12px;">Enter your teacher name and official password from the Teacher sheet.</p>
+    <p style="font-size:12px; color:#64748b; margin-top:0; margin-bottom:12px;">Enter your teacher name and official password from the Teachers sheet.</p>
     <input id="adminNameInput" placeholder="Teacher Name">
     <input type="password" id="adminPassInput" placeholder="Password">
     <button id="adminLoginBtn" onclick="verifyAdminLogin()">Login as Teacher</button>
@@ -409,7 +409,7 @@ button:active {
         <input id="uploadNoteTitle" placeholder="PDF Title (e.g., Physics Chapter 2.pdf)">
         <input id="uploadNoteInfo" placeholder="Details (e.g., Size: 2.1 MB | Added: Oct 2026)">
         <input type="file" id="pdfFileInput" accept="application/pdf" style="background:white; padding:10px;">
-        <button onclick="uploadPDFNote()">Upload & Publish PDF</button>
+        <button id="uploadPdfBtn" onclick="uploadPDFNote()">Upload & Publish PDF</button>
     </div>
 
     <!-- External Link Option -->
@@ -665,25 +665,40 @@ function uploadPDFNote() {
     }
 
     let file = fileInput.files[0];
-    showToast("Uploading PDF to Google Drive...");
+    let uploadBtn = document.getElementById('uploadPdfBtn');
+    uploadBtn.innerText = "Uploading to Drive...";
+    uploadBtn.disabled = true;
 
     let reader = new FileReader();
     reader.onload = function(e) {
         let base64Data = e.target.result;
         
-        sendDataToSheet({
-            action: "uploadPDF",
-            title: title,
-            info: info || `Size: ${(file.size / (1024*1024)).toFixed(1)} MB | Added by ${teacherName}`,
-            fileName: file.name,
-            fileType: file.type,
-            fileData: base64Data
+        // Corrected payload encoding using standard form POST for large payloads
+        fetch(sheetURL, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "uploadPDF",
+                title: title,
+                info: info || `Size: ${(file.size / (1024*1024)).toFixed(1)} MB | Added by ${teacherName}`,
+                fileName: file.name,
+                fileType: file.type,
+                fileData: base64Data
+            })
+        })
+        .then(() => {
+            uploadBtn.innerText = "Upload & Publish PDF";
+            uploadBtn.disabled = false;
+            showToast("PDF Uploaded & Published!");
+            document.getElementById('uploadNoteTitle').value = "";
+            document.getElementById('uploadNoteInfo').value = "";
+            fileInput.value = "";
+        })
+        .catch(err => {
+            uploadBtn.innerText = "Upload & Publish PDF";
+            uploadBtn.disabled = false;
+            showToast("Upload Error. Try smaller file.");
+            console.error(err);
         });
-
-        showToast("PDF Uploaded & Published!");
-        document.getElementById('uploadNoteTitle').value = "";
-        document.getElementById('uploadNoteInfo').value = "";
-        fileInput.value = "";
     };
     reader.readAsDataURL(file);
 }
@@ -782,7 +797,7 @@ function renderNotes(notes) {
                 </div>
                 <div class="pdf-actions">
                     <a href="${note.link}" target="_blank" onclick="trackView('${note.title}')" class="btn-small btn-view">View</a>
-                    <a href="${note.link}" download onclick="trackDownload('${note.title}')" class="btn-small btn-download">Download</a>
+                    <a href="${note.link}" download target="_blank" onclick="trackDownload('${note.title}')" class="btn-small btn-download">Download</a>
                 </div>
             `;
             container.appendChild(card);
