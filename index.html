@@ -88,7 +88,7 @@ h2, h3 {
     margin-top: 0;
 }
 
-input, textarea {
+input, textarea, select {
     width: 100%;
     padding: 13px 15px;
     margin: 8px 0;
@@ -100,7 +100,7 @@ input, textarea {
     font-family: inherit;
 }
 
-input:focus, textarea:focus {
+input:focus, textarea:focus, select:focus {
     border-color: #10b981;
     background: #ffffff;
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
@@ -133,6 +133,10 @@ button:active {
     margin-top: 0;
     box-shadow: none;
     border-radius: 8px;
+}
+
+.btn-secondary {
+    background: #64748b;
 }
 
 .hidden {
@@ -316,6 +320,14 @@ button:active {
     display: block;
 }
 
+.admin-card {
+    background: #f0fdf4;
+    border: 1.5px solid #bbf7d0;
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
 .toast {
     position: fixed;
     bottom: 20px;
@@ -363,11 +375,48 @@ button:active {
 
 <!-- Login Screen -->
 <div id="loginDiv">
-<h3 style="font-size:16px; margin-bottom:8px;">Student Authentication</h3>
-<p style="font-size:12px; color:#64748b; margin-top:0; margin-bottom:12px;">Enter your credentials verified in the official roster list.</p>
-<input id="name" placeholder="Full Student Name">
-<input id="roll" placeholder="Official Roll No (e.g., 101)">
-<button id="loginBtn" onclick="loginPortal()">Access Portal</button>
+    <h3 style="font-size:16px; margin-bottom:8px;">Student Authentication</h3>
+    <p style="font-size:12px; color:#64748b; margin-top:0; margin-bottom:12px;">Enter your credentials verified in the official roster list.</p>
+    <input id="name" placeholder="Full Student Name">
+    <input id="roll" placeholder="Official Roll No (e.g., 101)">
+    <button id="loginBtn" onclick="loginPortal()">Access Portal</button>
+
+    <div style="text-align:center; margin-top:14px; border-top:1px solid #f1f5f9; padding-top:12px;">
+        <a href="javascript:void(0)" onclick="openAdminLogin()" style="font-size:12px; color:#059669; text-decoration:none; font-weight:600;">🔐 Teacher / Admin Portal Access</a>
+    </div>
+</div>
+
+<!-- Admin Login Modal / View -->
+<div id="adminLoginDiv" class="hidden">
+    <h3 style="font-size:16px; margin-bottom:8px; color:#059669;">Admin / Teacher Authentication</h3>
+    <p style="font-size:12px; color:#64748b; margin-top:0; margin-bottom:12px;">Enter admin password to publish notes and notices.</p>
+    <input type="password" id="adminPassInput" placeholder="Enter Admin Password">
+    <button onclick="verifyAdminLogin()">Login as Admin</button>
+    <button class="btn-secondary" onclick="backToStudentLogin()">Back to Student Login</button>
+</div>
+
+<!-- Admin Dashboard Screen -->
+<div id="adminDashboardDiv" class="hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; background:#ecfdf5; padding:8px 12px; border-radius:10px;">
+        <span style="font-weight:600; font-size:13px; color:#065f46;">🛠️ Admin Control Panel</span>
+        <button class="btn-logout" onclick="logoutAdmin()">Exit Admin</button>
+    </div>
+
+    <div class="admin-card">
+        <h4 style="margin:0 0 8px 0; font-size:14px; color:#065f46;">➕ Upload New Study Note</h4>
+        <input id="newNoteTitle" placeholder="PDF Title (e.g., Physics Chapter 2.pdf)">
+        <input id="newNoteInfo" placeholder="Details (e.g., Size: 2.1 MB | Added: Oct 2026)">
+        <input id="newNoteLink" placeholder="Google Drive or PDF Share Link">
+        <button onclick="submitNewNote()">Publish Note to Sheet</button>
+    </div>
+
+    <div class="admin-card">
+        <h4 style="margin:0 0 8px 0; font-size:14px; color:#065f46;">📢 Post Campus Notice</h4>
+        <input id="newNoticeTitle" placeholder="Notice Title (e.g., Mid-Term Exam Schedule)">
+        <input id="newNoticeDate" placeholder="Date (e.g., Oct 30, 2026)">
+        <textarea id="newNoticeContent" rows="2" placeholder="Notice details..."></textarea>
+        <button onclick="submitNewNotice()">Publish Notice to Sheet</button>
+    </div>
 </div>
 
 <!-- Portal Screen -->
@@ -425,7 +474,7 @@ button:active {
 <div id="toast" class="toast">Action notification</div>
 
 <script>
-let sheetURL = "https://script.google.com/macros/s/AKfycbwlb07Gi7kMKMfxhgbpWNnHZDCsxLUSFxjZ4mDQzVjTM3InQJLR1sNlq3mYJhSA3nn5-w/exec";
+let sheetURL = "https://script.google.com/macros/s/AKfycbzfaigXifegY_m3zRy4xgPfSNnvWzX35Fhs7JtfWExS0XVqLyog_ShfmxCRlk0PGSQDNQ/exec";
 let studentName = "", studentRoll = "";
 let allNotesData = [];
 
@@ -445,6 +494,13 @@ function updateCharCount() {
 
 // Auto login check on page load
 window.onload = function() {
+    let savedAdmin = localStorage.getItem('mach_admin_logged');
+    if (savedAdmin === 'true') {
+        document.getElementById('loginDiv').classList.add('hidden');
+        document.getElementById('adminDashboardDiv').classList.remove('hidden');
+        return;
+    }
+
     let savedName = localStorage.getItem('mach_student_name');
     let savedRoll = localStorage.getItem('mach_student_roll');
 
@@ -460,7 +516,6 @@ window.onload = function() {
         loadAnnouncementsFromSheet();
         loadPreviousChats();
 
-        // Automatically fetch new chat messages every 5 seconds
         setInterval(loadPreviousChats, 5000);
     }
 };
@@ -489,7 +544,6 @@ function loginPortal() {
     loginBtn.innerText = "Verifying Enrollment...";
     loginBtn.disabled = true;
 
-    // Verify student enrollment from "Students" tab
     fetch(`${sheetURL}?action=verifyLogin&roll=${encodeURIComponent(rollInput)}&name=${encodeURIComponent(nameInput)}`)
     .then(res => res.json())
     .then(data => {
@@ -534,6 +588,81 @@ function logoutPortal() {
     localStorage.removeItem('mach_student_name');
     localStorage.removeItem('mach_student_roll');
     location.reload();
+}
+
+// Admin Navigation Functions
+function openAdminLogin() {
+    document.getElementById('loginDiv').classList.add('hidden');
+    document.getElementById('adminLoginDiv').classList.remove('hidden');
+}
+
+function backToStudentLogin() {
+    document.getElementById('adminLoginDiv').classList.add('hidden');
+    document.getElementById('loginDiv').classList.remove('hidden');
+}
+
+function verifyAdminLogin() {
+    let pass = document.getElementById('adminPassInput').value.trim();
+    // Default master passkey: mach2026 (you can change this password anytime here)
+    if (pass === "mach2026") {
+        localStorage.setItem('mach_admin_logged', 'true');
+        document.getElementById('adminLoginDiv').classList.add('hidden');
+        document.getElementById('adminDashboardDiv').classList.remove('hidden');
+        showToast("Admin Logged In Successfully");
+    } else {
+        showToast("Incorrect Admin Password");
+    }
+}
+
+function logoutAdmin() {
+    localStorage.removeItem('mach_admin_logged');
+    location.reload();
+}
+
+function submitNewNote() {
+    let title = document.getElementById('newNoteTitle').value.trim();
+    let info = document.getElementById('newNoteInfo').value.trim();
+    let link = document.getElementById('newNoteLink').value.trim();
+
+    if(!title || !link) {
+        showToast("Title and Link are required");
+        return;
+    }
+
+    sendDataToSheet({
+        action: "addNote",
+        title: title,
+        info: info || "Size: N/A | Added: Recent",
+        link: link
+    });
+
+    showToast("Note Published Successfully!");
+    document.getElementById('newNoteTitle').value = "";
+    document.getElementById('newNoteInfo').value = "";
+    document.getElementById('newNoteLink').value = "";
+}
+
+function submitNewNotice() {
+    let title = document.getElementById('newNoticeTitle').value.trim();
+    let date = document.getElementById('newNoticeDate').value.trim();
+    let content = document.getElementById('newNoticeContent').value.trim();
+
+    if(!title || !content) {
+        showToast("Title and Content are required");
+        return;
+    }
+
+    sendDataToSheet({
+        action: "addNotice",
+        title: title,
+        date: date || "Recent",
+        content: content
+    });
+
+    showToast("Notice Published Successfully!");
+    document.getElementById('newNoticeTitle').value = "";
+    document.getElementById('newNoticeDate').value = "";
+    document.getElementById('newNoticeContent').value = "";
 }
 
 function switchTab(tab) {
