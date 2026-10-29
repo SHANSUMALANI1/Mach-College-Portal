@@ -486,7 +486,7 @@ button:active {
 <div id="toast" class="toast">Action notification</div>
 
 <script>
-let sheetURL = "https://script.google.com/macros/s/AKfycbwppOJJNo-rQtMJW3ErYICTyBTeLpDVU7NHUKSn1Od7M-nD4-YxD3kbw87x_tGE6-Kxuw/exec";
+let sheetURL = "https://script.google.com/macros/s/AKfycbyGPM-jysJ_kqF-2O6Ykm8C0q0LrZK3bTS71yVOWLj6f6H9Cn59Tvh_ZSUCMhUlb0Sn1Q/exec";
 let studentName = "", studentRoll = "";
 let teacherName = "";
 let allNotesData = [];
@@ -673,7 +673,6 @@ function uploadPDFNote() {
     reader.onload = function(e) {
         let base64Data = e.target.result;
         
-        // Corrected payload encoding using standard form POST for large payloads
         fetch(sheetURL, {
             method: "POST",
             body: JSON.stringify({
