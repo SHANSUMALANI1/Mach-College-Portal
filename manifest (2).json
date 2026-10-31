@@ -1,0 +1,13 @@
+{
+  "background_color": "#060c17",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Govt Boys Degree College Mach Portal",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Students Portal",
+  "start_url": "/",
+  "theme_color": "#1581e0",
+  "id": "Govtboysdegreecollegemach",
+  "description": "It is a student portal for the students of Govt Boys Degree College Mach."
+}
