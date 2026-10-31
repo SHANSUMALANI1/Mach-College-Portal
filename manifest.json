@@ -1,0 +1,15 @@
+{
+  "name": "Government Boys Degree College Mach Portal",
+  "short_name": "Mach College",
+  "start_url": "/Mach-College-Portal/",
+  "display": "standalone",
+  "background_color": "#070d19",
+  "theme_color": "#06b6d4",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135755.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
