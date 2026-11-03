@@ -631,7 +631,7 @@ button:active {
 <div id="toast" class="toast">Action notification</div>
 
 <script>
-let sheetURL = "https://script.google.com/macros/s/AKfycbxHBasAXw9heQl1px_fTLiMBcM3QBHBS3E4mRL4YnVoxfKXM26IrkTeNScgByuLXFaXeA/exec";
+let sheetURL = "https://script.google.com/macros/s/AKfycbx_jKQDDaEdIfNysHn674jXLWqAccbdt5U3cISiW0F0Rf8jRkriDtWec_VnAMcz0va2Uw/exec";
 let studentName = "", studentRoll = "", studentSession = "2026-27";
 let teacherName = "";
 let currentTeacherSession = "2026-27";
@@ -969,10 +969,12 @@ function renderTeacherSessionPanel() {
 
         <!-- Session Discussion Panel -->
         <div class="admin-card">
-            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">💬 Student Discussions (${currentTeacherSession})</h4>
+            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">💬 Student Discussions & Teacher Reply (${currentTeacherSession})</h4>
             <div class="chat-box" id="teacherChatBox_${currentTeacherSession}">
                 <p style="color:#94a3b8; font-size:12px;">Loading discussions...</p>
             </div>
+            <textarea id="teacherReplyInput_${currentTeacherSession}" rows="2" placeholder="Type response to students..."></textarea>
+            <button onclick="postTeacherReply('${currentTeacherSession}')">Send Teacher Response</button>
         </div>
     `;
 
@@ -986,6 +988,7 @@ function loadTeacherNotes(sess) {
     .then(res => res.json())
     .then(data => {
         let container = document.getElementById(`manageNotesContainer_${sess}`);
+        if (!container) return;
         container.innerHTML = "";
         if (Array.isArray(data) && data.length > 0) {
             data.forEach(note => {
@@ -998,7 +1001,7 @@ function loadTeacherNotes(sess) {
                     </div>
                     <div style="display:flex; gap:6px;">
                         <button class="btn-small btn-view" onclick="window.open('${note.link}', '_blank')">View</button>
-                        <button class="btn-small btn-edit" onclick="editNotePrompt(${note.rowIndex}, '${note.title}', '${note.info}', '${note.link}', '${sess}')">Edit</button>
+                        <button class="btn-small btn-edit" onclick="editNotePrompt(${note.rowIndex}, '${encodeURIComponent(note.title)}', '${encodeURIComponent(note.info || '')}', '${encodeURIComponent(note.link)}', '${sess}')">Edit</button>
                         <button class="btn-small btn-delete" onclick="deleteNoteItem(${note.rowIndex}, '${sess}')">Delete</button>
                     </div>
                 `;
@@ -1015,6 +1018,7 @@ function loadTeacherNotices(sess) {
     .then(res => res.json())
     .then(data => {
         let container = document.getElementById(`manageNoticesContainer_${sess}`);
+        if (!container) return;
         container.innerHTML = "";
         if (Array.isArray(data) && data.length > 0) {
             data.forEach(notice => {
@@ -1026,7 +1030,7 @@ function loadTeacherNotices(sess) {
                         <span style="font-size:11px; color:#94a3b8;">${notice.content}</span>
                     </div>
                     <div style="display:flex; gap:6px;">
-                        <button class="btn-small btn-edit" onclick="editNoticePrompt(${notice.rowIndex}, '${notice.title}', '${notice.date}', '${notice.content}', '${sess}')">Edit</button>
+                        <button class="btn-small btn-edit" onclick="editNoticePrompt(${notice.rowIndex}, '${encodeURIComponent(notice.title)}', '${encodeURIComponent(notice.date || '')}', '${encodeURIComponent(notice.content)}', '${sess}')">Edit</button>
                         <button class="btn-small btn-delete" onclick="deleteNoticeItem(${notice.rowIndex}, '${sess}')">Delete</button>
                     </div>
                 `;
@@ -1043,6 +1047,7 @@ function loadTeacherDiscussions(sess) {
     .then(res => res.json())
     .then(data => {
         let chatBox = document.getElementById(`teacherChatBox_${sess}`);
+        if (!chatBox) return;
         chatBox.innerHTML = "";
         if (Array.isArray(data) && data.length > 0) {
             data.forEach(item => {
@@ -1056,6 +1061,27 @@ function loadTeacherDiscussions(sess) {
             chatBox.innerHTML = "<p style='color:#94a3b8; font-size:12px; text-align:center;'>No messages in this session forum yet.</p>";
         }
     });
+}
+
+function postTeacherReply(sess) {
+    let replyInput = document.getElementById(`teacherReplyInput_${sess}`);
+    let msg = replyInput.value.trim();
+    if (!msg) {
+        showToast("Please enter a reply message");
+        return;
+    }
+
+    sendDataToSheet({
+        action: "chat",
+        session: sess,
+        name: `Teacher (${teacherName})`,
+        roll: "Staff",
+        message: msg
+    });
+
+    replyInput.value = "";
+    showToast("Reply Posted!");
+    setTimeout(() => loadTeacherDiscussions(sess), 1000);
 }
 
 function uploadPDFNoteFor(sess) {
@@ -1113,7 +1139,11 @@ function submitNewNoticeFor(sess) {
     setTimeout(() => renderTeacherSessionPanel(), 1000);
 }
 
-function editNotePrompt(rowIndex, title, info, link, sess) {
+function editNotePrompt(rowIndex, encTitle, encInfo, encLink, sess) {
+    let title = decodeURIComponent(encTitle);
+    let info = decodeURIComponent(encInfo);
+    let link = decodeURIComponent(encLink);
+
     let newTitle = prompt("Edit Note Title:", title);
     if(newTitle === null) return;
     let newInfo = prompt("Edit Note Info/Details:", info);
@@ -1144,7 +1174,11 @@ function deleteNoteItem(rowIndex, sess) {
     setTimeout(() => renderTeacherSessionPanel(), 1000);
 }
 
-function editNoticePrompt(rowIndex, title, date, content, sess) {
+function editNoticePrompt(rowIndex, encTitle, encDate, encContent, sess) {
+    let title = decodeURIComponent(encTitle);
+    let date = decodeURIComponent(encDate);
+    let content = decodeURIComponent(encContent);
+
     let newTitle = prompt("Edit Notice Title:", title);
     if(newTitle === null) return;
     let newDate = prompt("Edit Notice Date:", date);
