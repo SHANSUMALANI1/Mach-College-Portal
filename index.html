@@ -471,14 +471,7 @@ button:active {
 <!-- Student Sign Up Screen -->
 <div id="signUpDiv">
     <h3 style="font-size:16px; margin-bottom:8px;">Student Account Registration</h3>
-    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Select your Session and enter your roster Name and Roll No to create a password.</p>
-    
-    <label style="font-size:12px; color:#38bdf8; font-weight:600;">Select Academic Session:</label>
-    <select id="signupSession">
-        <option value="2026-27">Session 2026-27</option>
-        <option value="2025-26">Session 2025-26</option>
-        <option value="2024-25">Session 2024-25</option>
-    </select>
+    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your roster Name and Roll No to create a password.</p>
     
     <input id="signupName" placeholder="Full Student Name (from Sheet)">
     <input id="signupRoll" placeholder="Official Roll No (e.g., 101)">
@@ -497,14 +490,7 @@ button:active {
 <!-- Student Login Screen -->
 <div id="loginDiv" class="hidden">
     <h3 style="font-size:16px; margin-bottom:8px;">Student Login</h3>
-    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Select your Session, Roll No and Password to log in.</p>
-    
-    <label style="font-size:12px; color:#38bdf8; font-weight:600;">Academic Session:</label>
-    <select id="loginSession">
-        <option value="2026-27">Session 2026-27</option>
-        <option value="2025-26">Session 2025-26</option>
-        <option value="2024-25">Session 2024-25</option>
-    </select>
+    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your Roll No and Password to log in.</p>
 
     <input id="roll" placeholder="Official Roll No (e.g., 101)">
     <input type="password" id="loginPass" placeholder="Password">
@@ -656,7 +642,7 @@ button:active {
 <div id="toast" class="toast">Action notification</div>
 
 <script>
-let sheetURL = "https://script.google.com/macros/s/AKfycbzo6HLhHVJtn6t0TGi4KFJm5UGKnE_T3ApWjQz3Sf9qXrqJT-1bIzXTMAKyP6KOaWqz7g/exec";
+let sheetURL = "https://script.google.com/macros/s/AKfycby2Uc532SidYt3brk8sbgWKGjs6eIGj1vIpCMuk1lWSMdCjooAWcuhZvx5SjpkqYaGA6w/exec";
 let studentName = "", studentRoll = "", studentSession = "2026-27";
 let teacherName = "";
 let allNotesData = [];
@@ -748,7 +734,6 @@ function sendDataToSheet(params) {
 }
 
 function signUpStudent() {
-    let session = document.getElementById('signupSession').value;
     let name = document.getElementById('signupName').value.trim();
     let roll = document.getElementById('signupRoll').value.trim();
     let pass = document.getElementById('signupPass').value.trim();
@@ -768,15 +753,14 @@ function signUpStudent() {
     btn.innerText = "Creating Account...";
     btn.disabled = true;
 
-    fetch(`${sheetURL}?action=studentSignUp&session=${encodeURIComponent(session)}&roll=${encodeURIComponent(roll)}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}`)
+    fetch(`${sheetURL}?action=studentSignUp&roll=${encodeURIComponent(roll)}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}`)
     .then(res => res.json())
     .then(data => {
         btn.innerText = "Create Account";
         btn.disabled = false;
 
         if (data.status === "success") {
-            showToast(`Account Created for Session ${session}! Please log in.`);
-            document.getElementById('loginSession').value = session;
+            showToast(`Account Created for Session ${data.detectedSession}! Please log in.`);
             document.getElementById('roll').value = roll;
             showStudentLogin();
         } else {
@@ -791,7 +775,6 @@ function signUpStudent() {
 }
 
 function loginPortal() {
-    let session = document.getElementById('loginSession').value;
     let rollInput = document.getElementById('roll').value.trim();
     let passInput = document.getElementById('loginPass').value.trim();
     
@@ -804,7 +787,7 @@ function loginPortal() {
     loginBtn.innerText = "Verifying Credentials...";
     loginBtn.disabled = true;
 
-    fetch(`${sheetURL}?action=verifyLogin&session=${encodeURIComponent(session)}&roll=${encodeURIComponent(rollInput)}&pass=${encodeURIComponent(passInput)}`)
+    fetch(`${sheetURL}?action=verifyLogin&roll=${encodeURIComponent(rollInput)}&pass=${encodeURIComponent(passInput)}`)
     .then(res => res.json())
     .then(data => {
         loginBtn.innerText = "Access Portal";
@@ -813,7 +796,7 @@ function loginPortal() {
         if (data.status === "success") {
             studentName = data.verifiedName || "Student";
             studentRoll = rollInput;
-            studentSession = session;
+            studentSession = data.detectedSession;
 
             localStorage.setItem('mach_student_name', studentName);
             localStorage.setItem('mach_student_roll', studentRoll);
@@ -830,13 +813,13 @@ function loginPortal() {
                 session: studentSession
             });
             
-            showToast("Welcome to the Portal!");
+            showToast(`Welcome! Session ${studentSession} detected.`);
             loadNotesFromSheet();
             loadAnnouncementsFromSheet();
             loadPreviousChats();
             setInterval(loadPreviousChats, 5000);
         } else {
-            showToast("Access Denied: Invalid Roll No or Password for " + session);
+            showToast("Access Denied: Invalid Roll No or Password");
         }
     })
     .catch(e => {
