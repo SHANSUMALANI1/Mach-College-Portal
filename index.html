@@ -1268,19 +1268,31 @@ function subscribeStudentRealtimeData() {
         }
     });
 
-    // Isolated Gender Channel Query
+    // Client-side sorted chat stream (prevents composite index requirements)
     const channelTag = `${studentSession}_${studentGender}`;
     const chatQuery = window.fs.query(
         window.fs.collection(window.db, "chats"), 
-        window.fs.where("genderChannel", "==", channelTag),
-        window.fs.orderBy("timestamp", "asc")
+        window.fs.where("genderChannel", "==", channelTag)
     );
+
     unsubscribeChats = window.fs.onSnapshot(chatQuery, (snapshot) => {
         let chatBox = document.getElementById('chatBox');
         let titleTag = studentGender === 'female' ? 'Girls' : 'Boys';
         chatBox.innerHTML = `<div class="chat-msg"><div class="author"><span>Admin / Teacher</span></div><div class="text">Welcome to the Session ${studentSession} ${titleTag} Forum!</div></div>`;
+
+        let messages = [];
         snapshot.forEach((doc) => {
-            let item = doc.data();
+            messages.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Client-side chronological sorting
+        messages.sort((a, b) => {
+            let tA = a.timestamp ? (a.timestamp.seconds || 0) : 0;
+            let tB = b.timestamp ? (b.timestamp.seconds || 0) : 0;
+            return tA - tB;
+        });
+
+        messages.forEach((item) => {
             let div = document.createElement('div');
             div.className = 'chat-msg';
             div.innerHTML = `<div class="author"><span>${item.name} (${item.roll})</span></div><div class="text">${item.message}</div>`;
@@ -1484,18 +1496,29 @@ function subscribeTeacherChatStream(sess) {
     const channelTag = `${sess}_${currentTeacherGenderChannel}`;
     const chatQ = window.fs.query(
         window.fs.collection(window.db, "chats"), 
-        window.fs.where("genderChannel", "==", channelTag),
-        window.fs.orderBy("timestamp", "asc")
+        window.fs.where("genderChannel", "==", channelTag)
     );
 
     unsubscribeTeacherChats = window.fs.onSnapshot(chatQ, (snapshot) => {
         let chatBox = document.getElementById(`teacherChatBox_${sess}`);
         if (!chatBox) return;
         chatBox.innerHTML = "";
-        if (!snapshot.empty) {
-            snapshot.forEach((docSnap) => {
-                let item = docSnap.data();
-                let chatId = docSnap.id;
+
+        let messages = [];
+        snapshot.forEach((docSnap) => {
+            messages.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        if (messages.length > 0) {
+            // Client-side chronological sorting
+            messages.sort((a, b) => {
+                let tA = a.timestamp ? (a.timestamp.seconds || 0) : 0;
+                let tB = b.timestamp ? (b.timestamp.seconds || 0) : 0;
+                return tA - tB;
+            });
+
+            messages.forEach((item) => {
+                let chatId = item.id;
                 let div = document.createElement('div');
                 div.className = 'chat-msg';
                 div.style.cssText = "display:flex; justify-content:space-between; align-items:flex-start; gap:8px;";
