@@ -10,6 +10,37 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
 
+<!-- Firebase Modular SDKs -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+        getFirestore, collection, doc, setDoc, addDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Your Firebase Configuration Keys
+    const firebaseConfig = {
+        apiKey: "AIzaSyANZ9eLYh6X1Lyr5r4CDaaGOBJyXR0Hnqo",
+        authDomain: "degree-college-mach.firebaseapp.com",
+        projectId: "degree-college-mach",
+        storageBucket: "degree-college-mach.firebasestorage.app",
+        messagingSenderId: "1088563726436",
+        appId: "1:1088563726436:web:66c15d1ff32b936c103771",
+        measurementId: "G-7M98GPN1X7"
+    };
+
+    // Initialize Firebase & Firestore
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Bind Firebase Firestore methods globally to window object
+    window.db = db;
+    window.fs = {
+        collection, doc, setDoc, addDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, serverTimestamp
+    };
+
+    console.log("⚡ Firebase Firestore Connected to Govt. Degree College Mach Portal!");
+</script>
+
 <style>
 * {
     box-sizing: border-box;
@@ -241,7 +272,6 @@ button:active {
     box-shadow: 0 4px 15px rgba(6, 182, 212, 0.35);
 }
 
-/* Professional Notification Indicator Light */
 .notif-dot {
     position: absolute;
     top: 8px;
@@ -514,10 +544,15 @@ button:active {
 <!-- Student Sign Up Screen -->
 <div id="signUpDiv">
     <h3 style="font-size:16px; margin-bottom:8px;">Student Account Registration</h3>
-    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your roster Name and Roll No to create a password.</p>
+    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your Name, Roll No, and Session to create a password.</p>
     
-    <input id="signupName" placeholder="Full Student Name (from Sheet)">
+    <input id="signupName" placeholder="Full Student Name">
     <input id="signupRoll" placeholder="Official Roll No (e.g., 101)">
+    <select id="signupSession" style="background: rgba(30, 41, 59, 0.9); color:#f8fafc;">
+        <option value="2026-27">Session 2026-27</option>
+        <option value="2025-26">Session 2025-26</option>
+        <option value="2024-25">Session 2024-25</option>
+    </select>
     <input type="password" id="signupPass" placeholder="Create Password">
     <input type="password" id="signupConfirmPass" placeholder="Re-enter Password">
     <button id="signupBtn" onclick="signUpStudent()">Create Account</button>
@@ -652,17 +687,17 @@ button:active {
 <div id="toast" class="toast">Action notification</div>
 
 <script>
-let sheetURL = "https://script.google.com/macros/s/AKfycby1RxfftG5qBoXY4JlPJanqCIb_7vg0Q8Xsvd5_yWS3Y2S5F3frvTqAK1BSwcdVEJ1nng/exec";
 let studentName = "", studentRoll = "", studentSession = "2026-27";
 let teacherName = "";
 let currentTeacherSession = "2026-27";
 let allNotesData = [];
-
-// Local Notification Trackers
-let lastSeenNotesCount = parseInt(localStorage.getItem('mach_seen_notes') || "0");
-let lastSeenNoticesCount = parseInt(localStorage.getItem('mach_seen_notices') || "0");
-let lastSeenChatsCount = parseInt(localStorage.getItem('mach_seen_chats') || "0");
 let activeTab = "notes";
+
+// Active Unsubscribe Listeners for Realtime Firestore
+let unsubscribeNotes = null;
+let unsubscribeNotices = null;
+let unsubscribeChats = null;
+let unsubscribeTeacherChats = null;
 
 function showToast(msg) {
     let t = document.getElementById('toast');
@@ -677,6 +712,15 @@ function updateCharCount() {
 }
 
 window.onload = function() {
+    let checkFirebase = setInterval(() => {
+        if (window.db && window.fs) {
+            clearInterval(checkFirebase);
+            initAppSession();
+        }
+    }, 100);
+};
+
+function initAppSession() {
     let savedTeacher = localStorage.getItem('mach_teacher_name');
     if (savedTeacher) {
         teacherName = savedTeacher;
@@ -684,7 +728,6 @@ window.onload = function() {
         hideAllAuthForms();
         document.getElementById('adminDashboardDiv').classList.remove('hidden');
         renderTeacherSessionPanel();
-        setInterval(checkTeacherNotifications, 6000);
         return;
     }
 
@@ -701,13 +744,9 @@ window.onload = function() {
         hideAllAuthForms();
         document.getElementById('portalDiv').classList.remove('hidden');
         
-        loadNotesFromSheet();
-        loadAnnouncementsFromSheet();
-        loadPreviousChats();
-
-        setInterval(backgroundPollStudentData, 5000);
+        subscribeStudentRealtimeData();
     }
-};
+}
 
 function hideAllAuthForms() {
     document.getElementById('loginDiv').classList.add('hidden');
@@ -740,19 +779,11 @@ function backToStudentLogin() {
     showStudentSignUp();
 }
 
-function sendDataToSheet(params) {
-    if(!params.session) params.session = studentSession;
-    fetch(sheetURL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(params).toString()
-    }).catch(e => console.log("Tracking Error:", e));
-}
-
-function signUpStudent() {
+// --- STUDENT AUTHENTICATION (FIRESTORE) ---
+async function signUpStudent() {
     let name = document.getElementById('signupName').value.trim();
     let roll = document.getElementById('signupRoll').value.trim();
+    let session = document.getElementById('signupSession').value;
     let pass = document.getElementById('signupPass').value.trim();
     let confirmPass = document.getElementById('signupConfirmPass').value.trim();
 
@@ -770,28 +801,39 @@ function signUpStudent() {
     btn.innerText = "Creating Account...";
     btn.disabled = true;
 
-    fetch(`${sheetURL}?action=studentSignUp&roll=${encodeURIComponent(roll)}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}`)
-    .then(res => res.json())
-    .then(data => {
-        btn.innerText = "Create Account";
-        btn.disabled = false;
+    try {
+        const studentRef = window.fs.doc(window.db, "students", roll);
+        const docSnap = await window.fs.getDoc(studentRef);
 
-        if (data.status === "success") {
-            showToast(`Account Created for Session ${data.detectedSession}! Please log in.`);
-            document.getElementById('roll').value = roll;
-            showStudentLogin();
-        } else {
-            showToast(data.message || "Roster Verification Failed.");
+        if (docSnap.exists()) {
+            showToast("Account with this Roll No already exists! Please log in.");
+            btn.innerText = "Create Account";
+            btn.disabled = false;
+            return;
         }
-    })
-    .catch(e => {
+
+        await window.fs.setDoc(studentRef, {
+            name: name,
+            roll: roll,
+            session: session,
+            pass: pass,
+            createdAt: window.fs.serverTimestamp()
+        });
+
         btn.innerText = "Create Account";
         btn.disabled = false;
-        showToast("Connection error. Try again.");
-    });
+        showToast(`Account Created for Session ${session}! Please log in.`);
+        document.getElementById('roll').value = roll;
+        showStudentLogin();
+    } catch (e) {
+        console.error(e);
+        btn.innerText = "Create Account";
+        btn.disabled = false;
+        showToast("Failed to create account. Try again.");
+    }
 }
 
-function loginPortal() {
+async function loginPortal() {
     let rollInput = document.getElementById('roll').value.trim();
     let passInput = document.getElementById('loginPass').value.trim();
     
@@ -804,16 +846,15 @@ function loginPortal() {
     loginBtn.innerText = "Verifying Credentials...";
     loginBtn.disabled = true;
 
-    fetch(`${sheetURL}?action=verifyLogin&roll=${encodeURIComponent(rollInput)}&pass=${encodeURIComponent(passInput)}`)
-    .then(res => res.json())
-    .then(data => {
-        loginBtn.innerText = "Access Portal";
-        loginBtn.disabled = false;
-        
-        if (data.status === "success") {
-            studentName = data.verifiedName || "Student";
-            studentRoll = rollInput;
-            studentSession = data.detectedSession;
+    try {
+        const studentRef = window.fs.doc(window.db, "students", rollInput);
+        const docSnap = await window.fs.getDoc(studentRef);
+
+        if (docSnap.exists() && docSnap.data().pass === passInput) {
+            const data = docSnap.data();
+            studentName = data.name;
+            studentRoll = data.roll;
+            studentSession = data.session || "2026-27";
 
             localStorage.setItem('mach_student_name', studentName);
             localStorage.setItem('mach_student_roll', studentRoll);
@@ -823,27 +864,22 @@ function loginPortal() {
             hideAllAuthForms();
             document.getElementById('portalDiv').classList.remove('hidden');
 
-            sendDataToSheet({
-                action: "login",
-                name: studentName,
-                roll: studentRoll,
-                session: studentSession
-            });
-            
+            loginBtn.innerText = "Access Portal";
+            loginBtn.disabled = false;
             showToast(`Welcome! Session ${studentSession} detected.`);
-            loadNotesFromSheet();
-            loadAnnouncementsFromSheet();
-            loadPreviousChats();
-            setInterval(backgroundPollStudentData, 5000);
+            
+            subscribeStudentRealtimeData();
         } else {
+            loginBtn.innerText = "Access Portal";
+            loginBtn.disabled = false;
             showToast("Access Denied: Invalid Roll No or Password");
         }
-    })
-    .catch(e => {
+    } catch (e) {
+        console.error(e);
         loginBtn.innerText = "Access Portal";
         loginBtn.disabled = false;
         showToast("Connection error. Try again.");
-    });
+    }
 }
 
 function logoutPortal() {
@@ -853,7 +889,8 @@ function logoutPortal() {
     location.reload();
 }
 
-function signUpTeacher() {
+// --- TEACHER AUTHENTICATION (FIRESTORE) ---
+async function signUpTeacher() {
     let name = document.getElementById('adminSignUpName').value.trim();
     let pass = document.getElementById('adminSignUpPass').value.trim();
     let confirmPass = document.getElementById('adminSignUpConfirmPass').value.trim();
@@ -872,28 +909,28 @@ function signUpTeacher() {
     btn.innerText = "Creating Account...";
     btn.disabled = true;
 
-    fetch(`${sheetURL}?action=teacherSignUp&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}`)
-    .then(res => res.json())
-    .then(data => {
-        btn.innerText = "Create Teacher Account";
-        btn.disabled = false;
+    try {
+        const teacherRef = window.fs.doc(window.db, "teachers", name);
+        await window.fs.setDoc(teacherRef, {
+            name: name,
+            pass: pass,
+            createdAt: window.fs.serverTimestamp()
+        });
 
-        if (data.status === "success") {
-            showToast("Teacher Account Created! Please log in.");
-            document.getElementById('adminNameInput').value = name;
-            openAdminLogin();
-        } else {
-            showToast("Could not create teacher account.");
-        }
-    })
-    .catch(e => {
         btn.innerText = "Create Teacher Account";
         btn.disabled = false;
-        showToast("Connection error. Try again.");
-    });
+        showToast("Teacher Account Created! Please log in.");
+        document.getElementById('adminNameInput').value = name;
+        openAdminLogin();
+    } catch (e) {
+        console.error(e);
+        btn.innerText = "Create Teacher Account";
+        btn.disabled = false;
+        showToast("Error creating teacher account.");
+    }
 }
 
-function verifyAdminLogin() {
+async function verifyAdminLogin() {
     let name = document.getElementById('adminNameInput').value.trim();
     let pass = document.getElementById('adminPassInput').value.trim();
 
@@ -906,30 +943,32 @@ function verifyAdminLogin() {
     btn.innerText = "Verifying Credentials...";
     btn.disabled = true;
 
-    fetch(`${sheetURL}?action=verifyTeacher&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}`)
-    .then(res => res.json())
-    .then(data => {
-        btn.innerText = "Login as Teacher";
-        btn.disabled = false;
+    try {
+        const teacherRef = window.fs.doc(window.db, "teachers", name);
+        const docSnap = await window.fs.getDoc(teacherRef);
 
-        if (data.status === "success") {
-            teacherName = data.teacherName || name;
+        if (docSnap.exists() && docSnap.data().pass === pass) {
+            teacherName = name;
             localStorage.setItem('mach_teacher_name', teacherName);
             document.getElementById('teacherWelcome').innerText = `🛠️ Welcome, ${teacherName}`;
             hideAllAuthForms();
             document.getElementById('adminDashboardDiv').classList.remove('hidden');
+            
+            btn.innerText = "Login as Teacher";
+            btn.disabled = false;
             renderTeacherSessionPanel();
-            setInterval(checkTeacherNotifications, 6000);
             showToast("Authenticated Successfully!");
         } else {
+            btn.innerText = "Login as Teacher";
+            btn.disabled = false;
             showToast("Access Denied: Invalid Teacher credentials.");
         }
-    })
-    .catch(e => {
+    } catch (e) {
+        console.error(e);
         btn.innerText = "Login as Teacher";
         btn.disabled = false;
         showToast("Connection error. Try again.");
-    });
+    }
 }
 
 function logoutAdmin() {
@@ -964,35 +1003,74 @@ function switchTab(tab) {
         document.getElementById('notesTab').classList.remove('hidden');
         document.getElementById('navBtnNotes').classList.add('active');
         document.getElementById('notifNotes').classList.add('hidden');
-        lastSeenNotesCount = allNotesData.length;
-        localStorage.setItem('mach_seen_notes', lastSeenNotesCount);
     } else if(tab === 'notices') {
         document.getElementById('noticesTab').classList.remove('hidden');
         document.getElementById('navBtnNotices').classList.add('active');
         document.getElementById('notifNotices').classList.add('hidden');
-        fetch(`${sheetURL}?action=getAnnouncements&session=${encodeURIComponent(studentSession)}`)
-        .then(res => res.json())
-        .then(data => {
-            if(Array.isArray(data)) {
-                lastSeenNoticesCount = data.length;
-                localStorage.setItem('mach_seen_notices', lastSeenNoticesCount);
-            }
-        });
     } else if(tab === 'discussion') {
         document.getElementById('discussionTab').classList.remove('hidden');
         document.getElementById('navBtnDiscussion').classList.add('active');
         document.getElementById('notifDiscussion').classList.add('hidden');
-        fetch(`${sheetURL}?action=getChats&session=${encodeURIComponent(studentSession)}`)
-        .then(res => res.json())
-        .then(data => {
-            if(Array.isArray(data)) {
-                lastSeenChatsCount = data.length;
-                localStorage.setItem('mach_seen_chats', lastSeenChatsCount);
-            }
-        });
     }
 }
 
+// --- REALTIME DATA LISTENERS (STUDENT) ---
+function subscribeStudentRealtimeData() {
+    // 1. Study Notes Realtime Stream
+    const notesQuery = window.fs.query(
+        window.fs.collection(window.db, "notes"), 
+        window.fs.where("session", "==", studentSession)
+    );
+    unsubscribeNotes = window.fs.onSnapshot(notesQuery, (snapshot) => {
+        allNotesData = [];
+        snapshot.forEach((doc) => {
+            allNotesData.push({ id: doc.id, ...doc.data() });
+        });
+        renderNotes(allNotesData);
+    });
+
+    // 2. Campus Notices Realtime Stream
+    const noticesQuery = window.fs.query(
+        window.fs.collection(window.db, "notices"), 
+        window.fs.where("session", "==", studentSession)
+    );
+    unsubscribeNotices = window.fs.onSnapshot(noticesQuery, (snapshot) => {
+        let container = document.getElementById('noticesContainer');
+        container.innerHTML = "";
+        if (!snapshot.empty) {
+            snapshot.forEach((doc) => {
+                let item = doc.data();
+                let card = document.createElement('div');
+                card.className = 'notice-card';
+                card.innerHTML = `<span class="notice-date">🗓️ ${item.date || 'Recent'}</span><h4>${item.title}</h4><p>${item.content}</p>`;
+                container.appendChild(card);
+            });
+        } else {
+            container.innerHTML = `<div class="notice-card"><span class="notice-date">📌 Official Notice</span><h4>Welcome</h4><p>No new notices for Session ${studentSession}.</p></div>`;
+        }
+    });
+
+    // 3. Discussion Live Stream
+    const chatQuery = window.fs.query(
+        window.fs.collection(window.db, "chats"), 
+        window.fs.where("session", "==", studentSession),
+        window.fs.orderBy("timestamp", "asc")
+    );
+    unsubscribeChats = window.fs.onSnapshot(chatQuery, (snapshot) => {
+        let chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML = `<div class="chat-msg"><div class="author"><span>Admin / Teacher</span></div><div class="text">Welcome to the Session ${studentSession} discussion forum!</div></div>`;
+        snapshot.forEach((doc) => {
+            let item = doc.data();
+            let div = document.createElement('div');
+            div.className = 'chat-msg';
+            div.innerHTML = `<div class="author"><span>${item.name} (${item.roll})</span></div><div class="text">${item.message}</div>`;
+            chatBox.appendChild(div);
+        });
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+}
+
+// --- TEACHER MANAGEMENT PANEL & REALTIME LISTENERS ---
 function renderTeacherSessionPanel() {
     let panel = document.getElementById('teacherSessionPanel');
     panel.innerHTML = `
@@ -1047,20 +1125,20 @@ function renderTeacherSessionPanel() {
         </div>
     `;
 
-    loadTeacherNotes(currentTeacherSession);
-    loadTeacherNotices(currentTeacherSession);
-    loadTeacherDiscussions(currentTeacherSession);
+    subscribeTeacherRealtimeData(currentTeacherSession);
 }
 
-function loadTeacherNotes(sess) {
-    fetch(`${sheetURL}?action=getNotes&session=${encodeURIComponent(sess)}`)
-    .then(res => res.json())
-    .then(data => {
+function subscribeTeacherRealtimeData(sess) {
+    // 1. Manage Notes Stream
+    const notesQ = window.fs.query(window.fs.collection(window.db, "notes"), window.fs.where("session", "==", sess));
+    window.fs.onSnapshot(notesQ, (snapshot) => {
         let container = document.getElementById(`manageNotesContainer_${sess}`);
         if (!container) return;
         container.innerHTML = "";
-        if (Array.isArray(data) && data.length > 0) {
-            data.forEach(note => {
+        if (!snapshot.empty) {
+            snapshot.forEach((docSnap) => {
+                let note = docSnap.data();
+                let id = docSnap.id;
                 let div = document.createElement('div');
                 div.style.cssText = "background:rgba(30,41,59,0.7); padding:10px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
                 div.innerHTML = `
@@ -1070,8 +1148,8 @@ function loadTeacherNotes(sess) {
                     </div>
                     <div style="display:flex; gap:6px;">
                         <button class="btn-small btn-view" onclick="window.open('${note.link}', '_blank')">View</button>
-                        <button class="btn-small btn-edit" onclick="editNotePrompt(${note.rowIndex}, '${encodeURIComponent(note.title)}', '${encodeURIComponent(note.info || '')}', '${encodeURIComponent(note.link)}', '${sess}')">Edit</button>
-                        <button class="btn-small btn-delete" onclick="deleteNoteItem(${note.rowIndex}, '${sess}')">Delete</button>
+                        <button class="btn-small btn-edit" onclick="editNotePrompt('${id}', '${encodeURIComponent(note.title)}', '${encodeURIComponent(note.info || '')}', '${encodeURIComponent(note.link)}')">Edit</button>
+                        <button class="btn-small btn-delete" onclick="deleteNoteItem('${id}')">Delete</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -1080,17 +1158,17 @@ function loadTeacherNotes(sess) {
             container.innerHTML = "<p style='color:#94a3b8; font-size:12px;'>No notes published for this session yet.</p>";
         }
     });
-}
 
-function loadTeacherNotices(sess) {
-    fetch(`${sheetURL}?action=getAnnouncements&session=${encodeURIComponent(sess)}`)
-    .then(res => res.json())
-    .then(data => {
+    // 2. Manage Notices Stream
+    const noticesQ = window.fs.query(window.fs.collection(window.db, "notices"), window.fs.where("session", "==", sess));
+    window.fs.onSnapshot(noticesQ, (snapshot) => {
         let container = document.getElementById(`manageNoticesContainer_${sess}`);
         if (!container) return;
         container.innerHTML = "";
-        if (Array.isArray(data) && data.length > 0) {
-            data.forEach(notice => {
+        if (!snapshot.empty) {
+            snapshot.forEach((docSnap) => {
+                let notice = docSnap.data();
+                let id = docSnap.id;
                 let div = document.createElement('div');
                 div.style.cssText = "background:rgba(30,41,59,0.7); padding:10px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
                 div.innerHTML = `
@@ -1099,8 +1177,8 @@ function loadTeacherNotices(sess) {
                         <span style="font-size:11px; color:#94a3b8;">${notice.content}</span>
                     </div>
                     <div style="display:flex; gap:6px;">
-                        <button class="btn-small btn-edit" onclick="editNoticePrompt(${notice.rowIndex}, '${encodeURIComponent(notice.title)}', '${encodeURIComponent(notice.date || '')}', '${encodeURIComponent(notice.content)}', '${sess}')">Edit</button>
-                        <button class="btn-small btn-delete" onclick="deleteNoticeItem(${notice.rowIndex}, '${sess}')">Delete</button>
+                        <button class="btn-small btn-edit" onclick="editNoticePrompt('${id}', '${encodeURIComponent(notice.title)}', '${encodeURIComponent(notice.date || '')}', '${encodeURIComponent(notice.content)}')">Edit</button>
+                        <button class="btn-small btn-delete" onclick="deleteNoticeItem('${id}')">Delete</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -1109,20 +1187,24 @@ function loadTeacherNotices(sess) {
             container.innerHTML = "<p style='color:#94a3b8; font-size:12px;'>No notices posted for this session yet.</p>";
         }
     });
-}
 
-function loadTeacherDiscussions(sess) {
-    fetch(`${sheetURL}?action=getChats&session=${encodeURIComponent(sess)}`)
-    .then(res => res.json())
-    .then(data => {
+    // 3. Discussion & Teacher Chat Stream
+    if(unsubscribeTeacherChats) unsubscribeTeacherChats();
+    const chatQ = window.fs.query(
+        window.fs.collection(window.db, "chats"), 
+        window.fs.where("session", "==", sess),
+        window.fs.orderBy("timestamp", "asc")
+    );
+    unsubscribeTeacherChats = window.fs.onSnapshot(chatQ, (snapshot) => {
         let chatBox = document.getElementById(`teacherChatBox_${sess}`);
         if (!chatBox) return;
         chatBox.innerHTML = "";
-        if (Array.isArray(data) && data.length > 0) {
-            data.forEach(item => {
+        if (!snapshot.empty) {
+            snapshot.forEach((docSnap) => {
+                let item = docSnap.data();
                 let div = document.createElement('div');
                 div.className = 'chat-msg';
-                div.innerHTML = `<div class="author"><span>${item.name} (${item.roll})</span><span>${item.time || ''}</span></div><div class="text">${item.message}</div>`;
+                div.innerHTML = `<div class="author"><span>${item.name} (${item.roll})</span></div><div class="text">${item.message}</div>`;
                 chatBox.appendChild(div);
             });
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -1132,7 +1214,8 @@ function loadTeacherDiscussions(sess) {
     });
 }
 
-function postTeacherReply(sess) {
+// --- ACTION & CRUD FUNCTIONS (FIRESTORE) ---
+async function postTeacherReply(sess) {
     let replyInput = document.getElementById(`teacherReplyInput_${sess}`);
     let msg = replyInput.value.trim();
     if (!msg) {
@@ -1140,20 +1223,19 @@ function postTeacherReply(sess) {
         return;
     }
 
-    sendDataToSheet({
-        action: "chat",
+    await window.fs.addDoc(window.fs.collection(window.db, "chats"), {
         session: sess,
         name: `Teacher (${teacherName})`,
         roll: "Staff",
-        message: msg
+        message: msg,
+        timestamp: window.fs.serverTimestamp()
     });
 
     replyInput.value = "";
     showToast("Reply Posted!");
-    setTimeout(() => loadTeacherDiscussions(sess), 1000);
 }
 
-function uploadPDFNoteFor(sess) {
+async function uploadPDFNoteFor(sess) {
     let title = document.getElementById(`uploadNoteTitle_${sess}`).value.trim();
     let info = document.getElementById(`uploadNoteInfo_${sess}`).value.trim();
     let fileInput = document.getElementById(`pdfFileInput_${sess}`);
@@ -1165,50 +1247,54 @@ function uploadPDFNoteFor(sess) {
 
     let file = fileInput.files[0];
     let reader = new FileReader();
-    reader.onload = function(e) {
-        let payload = new URLSearchParams();
-        payload.append("action", "uploadPDF");
-        payload.append("session", sess);
-        payload.append("title", title);
-        payload.append("info", info || `Size: ${(file.size / (1024*1024)).toFixed(1)} MB | Added by ${teacherName}`);
-        payload.append("fileName", file.name);
-        payload.append("fileType", file.type);
-        payload.append("fileData", e.target.result);
-
-        fetch(sheetURL, { method: "POST", mode: "no-cors", body: payload.toString() })
-        .then(() => {
-            showToast(`PDF Published to Session ${sess}!`);
-            setTimeout(() => renderTeacherSessionPanel(), 1000);
+    reader.onload = async function(e) {
+        await window.fs.addDoc(window.fs.collection(window.db, "notes"), {
+            session: sess,
+            title: title,
+            info: info || `Size: ${(file.size / (1024*1024)).toFixed(1)} MB | Added by ${teacherName}`,
+            link: e.target.result,
+            createdAt: window.fs.serverTimestamp()
         });
+        showToast(`PDF Published to Session ${sess}!`);
     };
     reader.readAsDataURL(file);
 }
 
-function submitNewNoteFor(sess) {
+async function submitNewNoteFor(sess) {
     let title = document.getElementById(`newNoteTitle_${sess}`).value.trim();
     let info = document.getElementById(`newNoteInfo_${sess}`).value.trim();
     let link = document.getElementById(`newNoteLink_${sess}`).value.trim();
 
     if(!title || !link) { showToast("Title and Link are required"); return; }
 
-    sendDataToSheet({ action: "addNote", session: sess, title: title, info: info || `Added by ${teacherName}`, link: link });
+    await window.fs.addDoc(window.fs.collection(window.db, "notes"), {
+        session: sess,
+        title: title,
+        info: info || `Added by ${teacherName}`,
+        link: link,
+        createdAt: window.fs.serverTimestamp()
+    });
     showToast(`Note Published to Session ${sess}!`);
-    setTimeout(() => renderTeacherSessionPanel(), 1000);
 }
 
-function submitNewNoticeFor(sess) {
+async function submitNewNoticeFor(sess) {
     let title = document.getElementById(`newNoticeTitle_${sess}`).value.trim();
     let date = document.getElementById(`newNoticeDate_${sess}`).value.trim();
     let content = document.getElementById(`newNoticeContent_${sess}`).value.trim();
 
     if(!title || !content) { showToast("Title and Content are required"); return; }
 
-    sendDataToSheet({ action: "addNotice", session: sess, title: title, date: date || "Recent", content: content });
+    await window.fs.addDoc(window.fs.collection(window.db, "notices"), {
+        session: sess,
+        title: title,
+        date: date || "Recent",
+        content: content,
+        createdAt: window.fs.serverTimestamp()
+    });
     showToast(`Notice Published to Session ${sess}!`);
-    setTimeout(() => renderTeacherSessionPanel(), 1000);
 }
 
-function editNotePrompt(rowIndex, encTitle, encInfo, encLink, sess) {
+async function editNotePrompt(id, encTitle, encInfo, encLink) {
     let title = decodeURIComponent(encTitle);
     let info = decodeURIComponent(encInfo);
     let link = decodeURIComponent(encLink);
@@ -1218,44 +1304,23 @@ function editNotePrompt(rowIndex, encTitle, encInfo, encLink, sess) {
     let newInfo = prompt("Edit Note Info/Details:", info);
     let newLink = prompt("Edit Note Link:", link);
 
-    let payload = {
-        action: "editNote",
-        session: sess,
-        rowIndex: rowIndex,
+    const docRef = window.fs.doc(window.db, "notes", id);
+    await window.fs.updateDoc(docRef, {
         title: newTitle,
         info: newInfo,
         link: newLink
-    };
-
-    fetch(sheetURL, { 
-        method: "POST", 
-        mode: "no-cors", 
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(payload).toString() 
     });
     showToast("Note Updated Successfully!");
-    setTimeout(() => renderTeacherSessionPanel(), 1000);
 }
 
-function deleteNoteItem(rowIndex, sess) {
+async function deleteNoteItem(id) {
     if(!confirm("Are you sure you want to delete this note?")) return;
-    let payload = {
-        action: "deleteNote",
-        session: sess,
-        rowIndex: rowIndex
-    };
-
-    fetch(sheetURL, { 
-        method: "POST", 
-        mode: "no-cors", 
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(payload).toString() 
-    });
+    const docRef = window.fs.doc(window.db, "notes", id);
+    await window.fs.deleteDoc(docRef);
     showToast("Note Deleted.");
-    setTimeout(() => renderTeacherSessionPanel(), 1000);
 }
 
-function editNoticePrompt(rowIndex, encTitle, encDate, encContent, sess) {
+async function editNoticePrompt(id, encTitle, encDate, encContent) {
     let title = decodeURIComponent(encTitle);
     let date = decodeURIComponent(encDate);
     let content = decodeURIComponent(encContent);
@@ -1265,57 +1330,20 @@ function editNoticePrompt(rowIndex, encTitle, encDate, encContent, sess) {
     let newDate = prompt("Edit Notice Date:", date);
     let newContent = prompt("Edit Notice Content:", content);
 
-    let payload = {
-        action: "editNotice",
-        session: sess,
-        rowIndex: rowIndex,
+    const docRef = window.fs.doc(window.db, "notices", id);
+    await window.fs.updateDoc(docRef, {
         title: newTitle,
         date: newDate,
         content: newContent
-    };
-
-    fetch(sheetURL, { 
-        method: "POST", 
-        mode: "no-cors", 
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(payload).toString() 
     });
     showToast("Notice Updated Successfully!");
-    setTimeout(() => renderTeacherSessionPanel(), 1000);
 }
 
-function deleteNoticeItem(rowIndex, sess) {
+async function deleteNoticeItem(id) {
     if(!confirm("Are you sure you want to delete this notice?")) return;
-    let payload = {
-        action: "deleteNotice",
-        session: sess,
-        rowIndex: rowIndex
-    };
-
-    fetch(sheetURL, { 
-        method: "POST", 
-        mode: "no-cors", 
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(payload).toString() 
-    });
+    const docRef = window.fs.doc(window.db, "notices", id);
+    await window.fs.deleteDoc(docRef);
     showToast("Notice Deleted.");
-    setTimeout(() => renderTeacherSessionPanel(), 1000);
-}
-
-function loadNotesFromSheet() {
-    fetch(`${sheetURL}?action=getNotes&session=${encodeURIComponent(studentSession)}`)
-    .then(res => res.json())
-    .then(data => {
-        allNotesData = Array.isArray(data) ? data : [];
-        renderNotes(allNotesData);
-
-        if (lastSeenNotesCount === 0) {
-            lastSeenNotesCount = allNotesData.length;
-            localStorage.setItem('mach_seen_notes', lastSeenNotesCount);
-        } else if (allNotesData.length > lastSeenNotesCount && activeTab !== 'notes') {
-            document.getElementById('notifNotes').classList.remove('hidden');
-        }
-    });
 }
 
 function renderNotes(notes) {
@@ -1348,108 +1376,33 @@ function filterNotes() {
     renderNotes(filtered);
 }
 
-function loadAnnouncementsFromSheet() {
-    fetch(`${sheetURL}?action=getAnnouncements&session=${encodeURIComponent(studentSession)}`)
-    .then(res => res.json())
-    .then(data => {
-        let container = document.getElementById('noticesContainer');
-        container.innerHTML = "";
-        let notices = Array.isArray(data) ? data : [];
-        if (notices.length > 0) {
-            notices.forEach(item => {
-                let card = document.createElement('div');
-                card.className = 'notice-card';
-                card.innerHTML = `<span class="notice-date">🗓️ ${item.date || 'Recent'}</span><h4>${item.title}</h4><p>${item.content}</p>`;
-                container.appendChild(card);
-            });
-
-            if (lastSeenNoticesCount === 0) {
-                lastSeenNoticesCount = notices.length;
-                localStorage.setItem('mach_seen_notices', lastSeenNoticesCount);
-            } else if (notices.length > lastSeenNoticesCount && activeTab !== 'notices') {
-                document.getElementById('notifNotices').classList.remove('hidden');
-            }
-        } else {
-            container.innerHTML = `<div class="notice-card"><span class="notice-date">📌 Official Notice</span><h4>Welcome</h4><p>No new notices for Session ${studentSession}.</p></div>`;
-        }
-    });
-}
-
-function loadPreviousChats() {
-    fetch(`${sheetURL}?action=getChats&session=${encodeURIComponent(studentSession)}`)
-    .then(res => res.json())
-    .then(data => {
-        let chatBox = document.getElementById('chatBox');
-        chatBox.innerHTML = `<div class="chat-msg"><div class="author"><span>Admin / Teacher</span></div><div class="text">Welcome to the Session ${studentSession} discussion forum!</div></div>`;
-        let chats = Array.isArray(data) ? data : [];
-        if (chats.length > 0) {
-            chats.forEach(item => {
-                let div = document.createElement('div');
-                div.className = 'chat-msg';
-                div.innerHTML = `<div class="author"><span>${item.name} (${item.roll})</span></div><div class="text">${item.message}</div>`;
-                chatBox.appendChild(div);
-            });
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            if (lastSeenChatsCount === 0) {
-                lastSeenChatsCount = chats.length;
-                localStorage.setItem('mach_seen_chats', lastSeenChatsCount);
-            } else if (chats.length > lastSeenChatsCount && activeTab !== 'discussion') {
-                document.getElementById('notifDiscussion').classList.remove('hidden');
-            }
-        }
-    });
-}
-
-function backgroundPollStudentData() {
-    loadNotesFromSheet();
-    loadAnnouncementsFromSheet();
-    loadPreviousChats();
-}
-
-function checkTeacherNotifications() {
-    ["2026-27", "2025-26", "2024-25"].forEach(sess => {
-        fetch(`${sheetURL}?action=getChats&session=${encodeURIComponent(sess)}`)
-        .then(res => res.json())
-        .then(chats => {
-            let badgeSpan = document.getElementById(`teacherTabNotif_${sess}`);
-            if (!badgeSpan) return;
-            let lastTeacherSeen = parseInt(localStorage.getItem(`mach_teacher_seen_${sess}`) || "0");
-            let chatList = Array.isArray(chats) ? chats : [];
-            if (lastTeacherSeen === 0) {
-                localStorage.setItem(`mach_teacher_seen_${sess}`, chatList.length);
-            } else if (chatList.length > lastTeacherSeen && currentTeacherSession !== sess) {
-                badgeSpan.innerHTML = `<span class="notif-dot" style="top:2px; right:-12px;"></span>`;
-            } else {
-                badgeSpan.innerHTML = "";
-            }
-        });
-    });
-}
-
-function trackDownload(pdfName) {
+async function trackDownload(pdfName) {
     showToast(`Downloading: ${pdfName}`);
-    sendDataToSheet({ action: "download", name: studentName, roll: studentRoll, session: studentSession, pdfName: pdfName });
+    await window.fs.addDoc(window.fs.collection(window.db, "telemetry"), {
+        action: "download", name: studentName, roll: studentRoll, session: studentSession, pdfName: pdfName, timestamp: window.fs.serverTimestamp()
+    });
 }
 
-function trackView(pdfName) {
+async function trackView(pdfName) {
     showToast(`Opening: ${pdfName}`);
-    sendDataToSheet({ action: "view", name: studentName, roll: studentRoll, session: studentSession, pdfName: pdfName });
+    await window.fs.addDoc(window.fs.collection(window.db, "telemetry"), {
+        action: "view", name: studentName, roll: studentRoll, session: studentSession, pdfName: pdfName, timestamp: window.fs.serverTimestamp()
+    });
 }
 
-function postMessage() {
+async function postMessage() {
     let msgInput = document.getElementById('msgInput');
     let msg = msgInput.value.trim();
     if(!msg) return;
 
-    let chatBox = document.getElementById('chatBox');
-    let div = document.createElement('div');
-    div.className = 'chat-msg';
-    div.innerHTML = `<div class="author"><span>${studentName} (${studentRoll})</span></div><div class="text">${msg}</div>`;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-    
-    sendDataToSheet({ action: "chat", name: studentName, roll: studentRoll, session: studentSession, message: msg });
+    await window.fs.addDoc(window.fs.collection(window.db, "chats"), {
+        session: studentSession,
+        name: studentName,
+        roll: studentRoll,
+        message: msg,
+        timestamp: window.fs.serverTimestamp()
+    });
+
     msgInput.value = "";
     updateCharCount();
     showToast("Message Posted");
