@@ -231,6 +231,7 @@ button:active {
     box-shadow: none;
     margin-top: 0;
     white-space: nowrap;
+    position: relative;
 }
 
 .tab-btn.active {
@@ -238,6 +239,25 @@ button:active {
     color: #ffffff;
     border-color: transparent;
     box-shadow: 0 4px 15px rgba(6, 182, 212, 0.35);
+}
+
+/* Professional Notification Indicator Light */
+.notif-dot {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    width: 8px;
+    height: 8px;
+    background-color: #38bdf8;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #38bdf8, 0 0 5px #06b6d4;
+    animation: pulseGlow 1.5s infinite;
+}
+
+@keyframes pulseGlow {
+    0% { transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+    70% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 0 6px rgba(56, 189, 248, 0); }
+    100% { transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
 }
 
 .search-box {
@@ -440,6 +460,7 @@ button:active {
     padding: 16px;
     border-radius: 14px;
     margin-bottom: 14px;
+    position: relative;
 }
 
 .toast {
@@ -565,9 +586,9 @@ button:active {
 
     <!-- Session Selector Tabs for Teacher -->
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTeacherSession('2026-27')">Session 2026-27</button>
-        <button class="tab-btn" onclick="switchTeacherSession('2025-26')">Session 2025-26</button>
-        <button class="tab-btn" onclick="switchTeacherSession('2024-25')">Session 2024-25</button>
+        <button class="tab-btn active" onclick="switchTeacherSession('2026-27')">Session 2026-27 <span id="teacherTabNotif_2026-27"></span></button>
+        <button class="tab-btn" onclick="switchTeacherSession('2025-26')">Session 2025-26 <span id="teacherTabNotif_2025-26"></span></button>
+        <button class="tab-btn" onclick="switchTeacherSession('2024-25')">Session 2024-25 <span id="teacherTabNotif_2024-25"></span></button>
     </div>
 
     <!-- Session Panel Container -->
@@ -585,9 +606,9 @@ button:active {
 
     <!-- Navigation Tabs -->
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('notes')">📚 Notes</button>
-        <button class="tab-btn" onclick="switchTab('notices')">📢 Notices</button>
-        <button class="tab-btn" onclick="switchTab('discussion')">💬 Discussion</button>
+        <button class="tab-btn active" id="navBtnNotes" onclick="switchTab('notes')">📚 Notes <span id="notifNotes" class="hidden notif-dot"></span></button>
+        <button class="tab-btn" id="navBtnNotices" onclick="switchTab('notices')">📢 Notices <span id="notifNotices" class="hidden notif-dot"></span></button>
+        <button class="tab-btn" id="navBtnDiscussion" onclick="switchTab('discussion')">💬 Discussion <span id="notifDiscussion" class="hidden notif-dot"></span></button>
     </div>
 
     <!-- Section 1: Study Notes Portion -->
@@ -631,11 +652,17 @@ button:active {
 <div id="toast" class="toast">Action notification</div>
 
 <script>
-let sheetURL = "https://script.google.com/macros/s/AKfycbzEBtveEPUQtyl_q3l6kmssL6FXXGsfqDTuI-m5W9WLrMKv1V1UHc5M5Xkc7YOkQZDApw/exec";
+let sheetURL = "https://script.google.com/macros/s/AKfycby1RxfftG5qBoXY4JlPJanqCIb_7vg0Q8Xsvd5_yWS3Y2S5F3frvTqAK1BSwcdVEJ1nng/exec";
 let studentName = "", studentRoll = "", studentSession = "2026-27";
 let teacherName = "";
 let currentTeacherSession = "2026-27";
 let allNotesData = [];
+
+// Local Notification Trackers
+let lastSeenNotesCount = parseInt(localStorage.getItem('mach_seen_notes') || "0");
+let lastSeenNoticesCount = parseInt(localStorage.getItem('mach_seen_notices') || "0");
+let lastSeenChatsCount = parseInt(localStorage.getItem('mach_seen_chats') || "0");
+let activeTab = "notes";
 
 function showToast(msg) {
     let t = document.getElementById('toast');
@@ -657,6 +684,7 @@ window.onload = function() {
         hideAllAuthForms();
         document.getElementById('adminDashboardDiv').classList.remove('hidden');
         renderTeacherSessionPanel();
+        setInterval(checkTeacherNotifications, 6000);
         return;
     }
 
@@ -677,7 +705,7 @@ window.onload = function() {
         loadAnnouncementsFromSheet();
         loadPreviousChats();
 
-        setInterval(loadPreviousChats, 5000);
+        setInterval(backgroundPollStudentData, 5000);
     }
 };
 
@@ -717,9 +745,7 @@ function sendDataToSheet(params) {
     fetch(sheetURL, {
         method: "POST",
         mode: "no-cors",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams(params).toString()
     }).catch(e => console.log("Tracking Error:", e));
 }
@@ -808,7 +834,7 @@ function loginPortal() {
             loadNotesFromSheet();
             loadAnnouncementsFromSheet();
             loadPreviousChats();
-            setInterval(loadPreviousChats, 5000);
+            setInterval(backgroundPollStudentData, 5000);
         } else {
             showToast("Access Denied: Invalid Roll No or Password");
         }
@@ -816,7 +842,6 @@ function loginPortal() {
     .catch(e => {
         loginBtn.innerText = "Access Portal";
         loginBtn.disabled = false;
-        console.log("Login Error:", e);
         showToast("Connection error. Try again.");
     });
 }
@@ -894,6 +919,7 @@ function verifyAdminLogin() {
             hideAllAuthForms();
             document.getElementById('adminDashboardDiv').classList.remove('hidden');
             renderTeacherSessionPanel();
+            setInterval(checkTeacherNotifications, 6000);
             showToast("Authenticated Successfully!");
         } else {
             showToast("Access Denied: Invalid Teacher credentials.");
@@ -922,6 +948,49 @@ function switchTeacherSession(sess) {
         }
     });
     renderTeacherSessionPanel();
+}
+
+function switchTab(tab) {
+    activeTab = tab;
+    document.getElementById('notesTab').classList.add('hidden');
+    document.getElementById('noticesTab').classList.add('hidden');
+    document.getElementById('discussionTab').classList.add('hidden');
+
+    document.getElementById('navBtnNotes').classList.remove('active');
+    document.getElementById('navBtnNotices').classList.remove('active');
+    document.getElementById('navBtnDiscussion').classList.remove('active');
+
+    if(tab === 'notes') {
+        document.getElementById('notesTab').classList.remove('hidden');
+        document.getElementById('navBtnNotes').classList.add('active');
+        document.getElementById('notifNotes').classList.add('hidden');
+        lastSeenNotesCount = allNotesData.length;
+        localStorage.setItem('mach_seen_notes', lastSeenNotesCount);
+    } else if(tab === 'notices') {
+        document.getElementById('noticesTab').classList.remove('hidden');
+        document.getElementById('navBtnNotices').classList.add('active');
+        document.getElementById('notifNotices').classList.add('hidden');
+        fetch(`${sheetURL}?action=getAnnouncements&session=${encodeURIComponent(studentSession)}`)
+        .then(res => res.json())
+        .then(data => {
+            if(Array.isArray(data)) {
+                lastSeenNoticesCount = data.length;
+                localStorage.setItem('mach_seen_notices', lastSeenNoticesCount);
+            }
+        });
+    } else if(tab === 'discussion') {
+        document.getElementById('discussionTab').classList.remove('hidden');
+        document.getElementById('navBtnDiscussion').classList.add('active');
+        document.getElementById('notifDiscussion').classList.add('hidden');
+        fetch(`${sheetURL}?action=getChats&session=${encodeURIComponent(studentSession)}`)
+        .then(res => res.json())
+        .then(data => {
+            if(Array.isArray(data)) {
+                lastSeenChatsCount = data.length;
+                localStorage.setItem('mach_seen_chats', lastSeenChatsCount);
+            }
+        });
+    }
 }
 
 function renderTeacherSessionPanel() {
@@ -1239,6 +1308,13 @@ function loadNotesFromSheet() {
     .then(data => {
         allNotesData = Array.isArray(data) ? data : [];
         renderNotes(allNotesData);
+
+        if (lastSeenNotesCount === 0) {
+            lastSeenNotesCount = allNotesData.length;
+            localStorage.setItem('mach_seen_notes', lastSeenNotesCount);
+        } else if (allNotesData.length > lastSeenNotesCount && activeTab !== 'notes') {
+            document.getElementById('notifNotes').classList.remove('hidden');
+        }
     });
 }
 
@@ -1278,13 +1354,21 @@ function loadAnnouncementsFromSheet() {
     .then(data => {
         let container = document.getElementById('noticesContainer');
         container.innerHTML = "";
-        if (Array.isArray(data) && data.length > 0) {
-            data.forEach(item => {
+        let notices = Array.isArray(data) ? data : [];
+        if (notices.length > 0) {
+            notices.forEach(item => {
                 let card = document.createElement('div');
                 card.className = 'notice-card';
                 card.innerHTML = `<span class="notice-date">🗓️ ${item.date || 'Recent'}</span><h4>${item.title}</h4><p>${item.content}</p>`;
                 container.appendChild(card);
             });
+
+            if (lastSeenNoticesCount === 0) {
+                lastSeenNoticesCount = notices.length;
+                localStorage.setItem('mach_seen_notices', lastSeenNoticesCount);
+            } else if (notices.length > lastSeenNoticesCount && activeTab !== 'notices') {
+                document.getElementById('notifNotices').classList.remove('hidden');
+            }
         } else {
             container.innerHTML = `<div class="notice-card"><span class="notice-date">📌 Official Notice</span><h4>Welcome</h4><p>No new notices for Session ${studentSession}.</p></div>`;
         }
@@ -1297,15 +1381,49 @@ function loadPreviousChats() {
     .then(data => {
         let chatBox = document.getElementById('chatBox');
         chatBox.innerHTML = `<div class="chat-msg"><div class="author"><span>Admin / Teacher</span></div><div class="text">Welcome to the Session ${studentSession} discussion forum!</div></div>`;
-        if (Array.isArray(data)) {
-            data.forEach(item => {
+        let chats = Array.isArray(data) ? data : [];
+        if (chats.length > 0) {
+            chats.forEach(item => {
                 let div = document.createElement('div');
                 div.className = 'chat-msg';
                 div.innerHTML = `<div class="author"><span>${item.name} (${item.roll})</span></div><div class="text">${item.message}</div>`;
                 chatBox.appendChild(div);
             });
             chatBox.scrollTop = chatBox.scrollHeight;
+
+            if (lastSeenChatsCount === 0) {
+                lastSeenChatsCount = chats.length;
+                localStorage.setItem('mach_seen_chats', lastSeenChatsCount);
+            } else if (chats.length > lastSeenChatsCount && activeTab !== 'discussion') {
+                document.getElementById('notifDiscussion').classList.remove('hidden');
+            }
         }
+    });
+}
+
+function backgroundPollStudentData() {
+    loadNotesFromSheet();
+    loadAnnouncementsFromSheet();
+    loadPreviousChats();
+}
+
+function checkTeacherNotifications() {
+    ["2026-27", "2025-26", "2024-25"].forEach(sess => {
+        fetch(`${sheetURL}?action=getChats&session=${encodeURIComponent(sess)}`)
+        .then(res => res.json())
+        .then(chats => {
+            let badgeSpan = document.getElementById(`teacherTabNotif_${sess}`);
+            if (!badgeSpan) return;
+            let lastTeacherSeen = parseInt(localStorage.getItem(`mach_teacher_seen_${sess}`) || "0");
+            let chatList = Array.isArray(chats) ? chats : [];
+            if (lastTeacherSeen === 0) {
+                localStorage.setItem(`mach_teacher_seen_${sess}`, chatList.length);
+            } else if (chatList.length > lastTeacherSeen && currentTeacherSession !== sess) {
+                badgeSpan.innerHTML = `<span class="notif-dot" style="top:2px; right:-12px;"></span>`;
+            } else {
+                badgeSpan.innerHTML = "";
+            }
+        });
     });
 }
 
