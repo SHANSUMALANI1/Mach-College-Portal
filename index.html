@@ -469,27 +469,66 @@ button:active {
     </div>
 </div>
 
-<!-- Login Screen -->
-<div id="loginDiv">
-    <h3 style="font-size:16px; margin-bottom:8px;">Student Authentication</h3>
-    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your credentials verified in the official roster list.</p>
-    <input id="name" placeholder="Full Student Name">
-    <input id="roll" placeholder="Official Roll No (e.g., 101)">
-    <button id="loginBtn" onclick="loginPortal()">Access Portal</button>
+<!-- Student Sign Up Screen -->
+<div id="signUpDiv" class="hidden">
+    <h3 style="font-size:16px; margin-bottom:8px;">Student Account Registration</h3>
+    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your official roster Name and Roll No to create your account password.</p>
+    <input id="signupName" placeholder="Full Student Name (from Sheet)">
+    <input id="signupRoll" placeholder="Official Roll No (e.g., 101)">
+    <input type="password" id="signupPass" placeholder="Create Password">
+    <input type="password" id="signupConfirmPass" placeholder="Re-enter Password">
+    <button id="signupBtn" onclick="signUpStudent()">Create Account</button>
 
     <div style="text-align:center; margin-top:16px; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;">
-        <a href="javascript:void(0)" onclick="openAdminLogin()" style="font-size:12px; color:#38bdf8; text-decoration:none; font-weight:600;">🔐 Teacher / Admin Portal Access</a>
+        <span style="font-size:12px; color:#94a3b8;">Already created an account? </span>
+        <a href="javascript:void(0)" onclick="showStudentLogin()" style="font-size:12px; color:#38bdf8; text-decoration:none; font-weight:600;">Log In Here</a>
     </div>
 </div>
 
-<!-- Teacher Login Modal / View -->
+<!-- Student Login Screen -->
+<div id="loginDiv">
+    <h3 style="font-size:16px; margin-bottom:8px;">Student Login</h3>
+    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your Roll No and Password to log in.</p>
+    <input id="roll" placeholder="Official Roll No (e.g., 101)">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button id="loginBtn" onclick="loginPortal()">Access Portal</button>
+
+    <div style="text-align:center; margin-top:16px; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;">
+        <span style="font-size:12px; color:#94a3b8;">Don't have an account? </span>
+        <a href="javascript:void(0)" onclick="showStudentSignUp()" style="font-size:12px; color:#38bdf8; text-decoration:none; font-weight:600;">Sign Up First</a>
+        <br><br>
+        <a href="javascript:void(0)" onclick="openAdminSignUp()" style="font-size:12px; color:#38bdf8; text-decoration:none; font-weight:600;">🔐 Teacher / Admin Access</a>
+    </div>
+</div>
+
+<!-- Teacher Sign Up Screen -->
+<div id="adminSignUpDiv" class="hidden">
+    <h3 style="font-size:16px; margin-bottom:8px; color:#38bdf8;">Teacher Account Registration</h3>
+    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your Teacher Name and set your account password.</p>
+    <input id="adminSignUpName" placeholder="Teacher Name">
+    <input type="password" id="adminSignUpPass" placeholder="Create Password">
+    <input type="password" id="adminSignUpConfirmPass" placeholder="Re-enter Password">
+    <button id="adminSignUpBtn" onclick="signUpTeacher()">Create Teacher Account</button>
+    
+    <div style="text-align:center; margin-top:14px;">
+        <a href="javascript:void(0)" onclick="openAdminLogin()" style="font-size:12px; color:#38bdf8; text-decoration:none; font-weight:600;">Already have a Teacher Account? Log In</a>
+        <br><br>
+        <a href="javascript:void(0)" onclick="backToStudentLogin()" style="font-size:12px; color:#94a3b8; text-decoration:none;">Back to Student Login</a>
+    </div>
+</div>
+
+<!-- Teacher Login Screen -->
 <div id="adminLoginDiv" class="hidden">
     <h3 style="font-size:16px; margin-bottom:8px; color:#38bdf8;">Teacher / Admin Authentication</h3>
-    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your teacher name and official password from the Teachers sheet.</p>
+    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your teacher name and password.</p>
     <input id="adminNameInput" placeholder="Teacher Name">
     <input type="password" id="adminPassInput" placeholder="Password">
     <button id="adminLoginBtn" onclick="verifyAdminLogin()">Login as Teacher</button>
-    <button class="btn-secondary" onclick="backToStudentLogin()">Back to Student Login</button>
+    
+    <div style="text-align:center; margin-top:14px;">
+        <a href="javascript:void(0)" onclick="openAdminSignUp()" style="font-size:12px; color:#38bdf8; text-decoration:none; font-weight:600;">Need a Teacher Account? Sign Up</a>
+    </div>
+    <button class="btn-secondary" onclick="backToStudentLogin()" style="margin-top:10px;">Back to Student Login</button>
 </div>
 
 <!-- Admin Dashboard Screen -->
@@ -582,7 +621,7 @@ button:active {
 <div id="toast" class="toast">Action notification</div>
 
 <script>
-let sheetURL = "https://script.google.com/macros/s/AKfycbyGPM-jysJ_kqF-2O6Ykm8C0q0LrZK3bTS71yVOWLj6f6H9Cn59Tvh_ZSUCMhUlb0Sn1Q/exec";
+let sheetURL = "https://script.google.com/macros/s/AKfycbxgx2LDJoj8SA_1o6HgX4nCx5AYc0PvBB9phz5U8Zh1i1-k6TPpXQAatE_Jatfte3TeLg/exec";
 let studentName = "", studentRoll = "";
 let teacherName = "";
 let allNotesData = [];
@@ -604,7 +643,7 @@ window.onload = function() {
     if (savedTeacher) {
         teacherName = savedTeacher;
         document.getElementById('teacherWelcome').innerText = `🛠️ Welcome, ${teacherName}`;
-        document.getElementById('loginDiv').classList.add('hidden');
+        hideAllAuthForms();
         document.getElementById('adminDashboardDiv').classList.remove('hidden');
         return;
     }
@@ -617,7 +656,7 @@ window.onload = function() {
         studentRoll = savedRoll;
         
         document.getElementById('userWelcome').innerText = `👤 ${studentName} (${studentRoll})`;
-        document.getElementById('loginDiv').classList.add('hidden');
+        hideAllAuthForms();
         document.getElementById('portalDiv').classList.remove('hidden');
         
         loadNotesFromSheet();
@@ -627,6 +666,37 @@ window.onload = function() {
         setInterval(loadPreviousChats, 5000);
     }
 };
+
+function hideAllAuthForms() {
+    document.getElementById('loginDiv').classList.add('hidden');
+    document.getElementById('signUpDiv').classList.add('hidden');
+    document.getElementById('adminLoginDiv').classList.add('hidden');
+    document.getElementById('adminSignUpDiv').classList.add('hidden');
+}
+
+function showStudentSignUp() {
+    hideAllAuthForms();
+    document.getElementById('signUpDiv').classList.remove('hidden');
+}
+
+function showStudentLogin() {
+    hideAllAuthForms();
+    document.getElementById('loginDiv').classList.remove('hidden');
+}
+
+function openAdminSignUp() {
+    hideAllAuthForms();
+    document.getElementById('adminSignUpDiv').classList.remove('hidden');
+}
+
+function openAdminLogin() {
+    hideAllAuthForms();
+    document.getElementById('adminLoginDiv').classList.remove('hidden');
+}
+
+function backToStudentLogin() {
+    showStudentLogin();
+}
 
 function sendDataToSheet(params) {
     fetch(sheetURL, {
@@ -639,34 +709,75 @@ function sendDataToSheet(params) {
     }).catch(e => console.log("Tracking Error:", e));
 }
 
+function signUpStudent() {
+    let name = document.getElementById('signupName').value.trim();
+    let roll = document.getElementById('signupRoll').value.trim();
+    let pass = document.getElementById('signupPass').value.trim();
+    let confirmPass = document.getElementById('signupConfirmPass').value.trim();
+
+    if (!name || !roll || !pass || !confirmPass) {
+        showToast("Please fill in all registration fields");
+        return;
+    }
+
+    if (pass !== confirmPass) {
+        showToast("Passwords do not match!");
+        return;
+    }
+
+    let btn = document.getElementById('signupBtn');
+    btn.innerText = "Creating Account...";
+    btn.disabled = true;
+
+    fetch(`${sheetURL}?action=studentSignUp&roll=${encodeURIComponent(roll)}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}`)
+    .then(res => res.json())
+    .then(data => {
+        btn.innerText = "Create Account";
+        btn.disabled = false;
+
+        if (data.status === "success") {
+            showToast("Account Created Successfully! Please log in.");
+            document.getElementById('roll').value = roll;
+            showStudentLogin();
+        } else {
+            showToast(data.message || "Roster Verification Failed.");
+        }
+    })
+    .catch(e => {
+        btn.innerText = "Create Account";
+        btn.disabled = false;
+        showToast("Connection error. Try again.");
+    });
+}
+
 function loginPortal() {
-    let nameInput = document.getElementById('name').value.trim();
     let rollInput = document.getElementById('roll').value.trim();
+    let passInput = document.getElementById('loginPass').value.trim();
     
-    if(!nameInput || !rollInput) { 
-        showToast("Please enter both Name and Roll No"); 
+    if(!rollInput || !passInput) { 
+        showToast("Please enter Roll No and Password"); 
         return; 
     }
 
     let loginBtn = document.getElementById('loginBtn');
-    loginBtn.innerText = "Verifying Enrollment...";
+    loginBtn.innerText = "Verifying Credentials...";
     loginBtn.disabled = true;
 
-    fetch(`${sheetURL}?action=verifyLogin&roll=${encodeURIComponent(rollInput)}&name=${encodeURIComponent(nameInput)}`)
+    fetch(`${sheetURL}?action=verifyLogin&roll=${encodeURIComponent(rollInput)}&pass=${encodeURIComponent(passInput)}`)
     .then(res => res.json())
     .then(data => {
         loginBtn.innerText = "Access Portal";
         loginBtn.disabled = false;
         
         if (data.status === "success") {
-            studentName = data.verifiedName || nameInput;
+            studentName = data.verifiedName || "Student";
             studentRoll = rollInput;
 
             localStorage.setItem('mach_student_name', studentName);
             localStorage.setItem('mach_student_roll', studentRoll);
 
             document.getElementById('userWelcome').innerText = `👤 ${studentName} (${studentRoll})`;
-            document.getElementById('loginDiv').classList.add('hidden');
+            hideAllAuthForms();
             document.getElementById('portalDiv').classList.remove('hidden');
 
             sendDataToSheet({
@@ -681,7 +792,7 @@ function loginPortal() {
             loadPreviousChats();
             setInterval(loadPreviousChats, 5000);
         } else {
-            showToast("Access Denied: Roll No not found in official roster.");
+            showToast("Access Denied: Invalid Roll No or Password.");
         }
     })
     .catch(e => {
@@ -698,14 +809,44 @@ function logoutPortal() {
     location.reload();
 }
 
-function openAdminLogin() {
-    document.getElementById('loginDiv').classList.add('hidden');
-    document.getElementById('adminLoginDiv').classList.remove('hidden');
-}
+function signUpTeacher() {
+    let name = document.getElementById('adminSignUpName').value.trim();
+    let pass = document.getElementById('adminSignUpPass').value.trim();
+    let confirmPass = document.getElementById('adminSignUpConfirmPass').value.trim();
 
-function backToStudentLogin() {
-    document.getElementById('adminLoginDiv').classList.add('hidden');
-    document.getElementById('loginDiv').classList.remove('hidden');
+    if (!name || !pass || !confirmPass) {
+        showToast("Fill in all fields");
+        return;
+    }
+
+    if (pass !== confirmPass) {
+        showToast("Passwords do not match!");
+        return;
+    }
+
+    let btn = document.getElementById('adminSignUpBtn');
+    btn.innerText = "Creating Account...";
+    btn.disabled = true;
+
+    fetch(`${sheetURL}?action=teacherSignUp&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}`)
+    .then(res => res.json())
+    .then(data => {
+        btn.innerText = "Create Teacher Account";
+        btn.disabled = false;
+
+        if (data.status === "success") {
+            showToast("Teacher Account Created! Please log in.");
+            document.getElementById('adminNameInput').value = name;
+            openAdminLogin();
+        } else {
+            showToast("Could not create teacher account.");
+        }
+    })
+    .catch(e => {
+        btn.innerText = "Create Teacher Account";
+        btn.disabled = false;
+        showToast("Connection error. Try again.");
+    });
 }
 
 function verifyAdminLogin() {
@@ -731,7 +872,7 @@ function verifyAdminLogin() {
             teacherName = data.teacherName || name;
             localStorage.setItem('mach_teacher_name', teacherName);
             document.getElementById('teacherWelcome').innerText = `🛠️ Welcome, ${teacherName}`;
-            document.getElementById('adminLoginDiv').classList.add('hidden');
+            hideAllAuthForms();
             document.getElementById('adminDashboardDiv').classList.remove('hidden');
             showToast("Authenticated Successfully!");
         } else {
