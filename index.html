@@ -49,7 +49,6 @@ body {
     margin-top: 5px;
 }
 
-/* Professional Hero Header Container */
 .hero-header {
     position: relative;
     width: 100%;
@@ -456,7 +455,7 @@ button:active {
 
 <div class="container">
 
-<!-- Professional Hero Header with Image Background, Gradient Overlay, Logo & Title -->
+<!-- Hero Header Banner -->
 <div class="hero-header">
     <img class="college-banner" src="https://lh3.googleusercontent.com/grass-cs/AABkmLeOd9iYRJMOk4zzKXJu5e_XrGHRmLO6nvDt30--T9reicExKGSqOMg2dB-gCwxSNrGf4rKtUDvyaHKQ3Hxl2kSj9h1jwYxnZHA5ywXgYyKEf8rbs_j6UodbFxrnplkKJ8HqrO4Q=w1200-h600-k-no" alt="Govt Boys Degree College Mach">
     <div class="hero-overlay"></div>
@@ -469,7 +468,7 @@ button:active {
     </div>
 </div>
 
-<!-- Student Sign Up Screen (PRIMARY FIRST SCREEN) -->
+<!-- Student Sign Up Screen -->
 <div id="signUpDiv">
     <h3 style="font-size:16px; margin-bottom:8px;">Student Account Registration</h3>
     <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Select your Session and enter your roster Name and Roll No to create a password.</p>
@@ -1091,7 +1090,7 @@ function renderNotes(notes) {
             container.appendChild(card);
         });
     } else {
-        container.innerHTML = "<p style='color:#94a3b8; font-size:12px; text-align:center;'>No matching notes found for your session.</p>";
+        container.innerHTML = `<p style='color:#94a3b8; font-size:12px; text-align:center;'>No matching notes found for Session ${studentSession}.</p>`;
     }
 }
 
