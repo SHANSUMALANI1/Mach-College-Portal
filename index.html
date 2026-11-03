@@ -347,6 +347,28 @@ button:active {
     color: white;
 }
 
+.btn-edit {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.btn-edit:hover {
+    background: #f59e0b;
+    color: white;
+}
+
+.btn-delete {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.btn-delete:hover {
+    background: #ef4444;
+    color: white;
+}
+
 .chat-box {
     height: 270px;
     overflow-y: auto;
@@ -541,49 +563,16 @@ button:active {
         <button class="btn-logout" onclick="logoutAdmin()">Exit Admin</button>
     </div>
 
-    <!-- Direct PDF File Upload Section -->
-    <div class="admin-card">
-        <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">📁 Upload PDF File Directly</h4>
-        <label style="font-size:11px; color:#94a3b8;">Target Session / Class:</label>
-        <select id="uploadTargetSession">
-            <option value="2026-27">Session 2026-27</option>
-            <option value="2025-26">Session 2025-26</option>
-            <option value="2024-25">Session 2024-25</option>
-        </select>
-        <input id="uploadNoteTitle" placeholder="PDF Title (e.g., Physics Chapter 2.pdf)">
-        <input id="uploadNoteInfo" placeholder="Details (e.g., Size: 2.1 MB | Added: Oct 2026)">
-        <input type="file" id="pdfFileInput" accept="application/pdf" style="background:rgba(15,23,42,0.6); padding:10px;">
-        <button id="uploadPdfBtn" onclick="uploadPDFNote()">Upload & Publish PDF</button>
+    <!-- Session Selector Tabs for Teacher -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTeacherSession('2026-27')">Session 2026-27</button>
+        <button class="tab-btn" onclick="switchTeacherSession('2025-26')">Session 2025-26</button>
+        <button class="tab-btn" onclick="switchTeacherSession('2024-25')">Session 2024-25</button>
     </div>
 
-    <!-- External Link Option -->
-    <div class="admin-card">
-        <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">🔗 Add Note via Shareable Link</h4>
-        <label style="font-size:11px; color:#94a3b8;">Target Session / Class:</label>
-        <select id="linkTargetSession">
-            <option value="2026-27">Session 2026-27</option>
-            <option value="2025-26">Session 2025-26</option>
-            <option value="2024-25">Session 2024-25</option>
-        </select>
-        <input id="newNoteTitle" placeholder="PDF Title (e.g., Chemistry Notes)">
-        <input id="newNoteInfo" placeholder="Details (e.g., Unit 1)">
-        <input id="newNoteLink" placeholder="Google Drive or PDF Share Link">
-        <button id="publishLinkBtn" onclick="submitNewNote()">Publish Link Note</button>
-    </div>
-
-    <!-- Notice Publishing Option -->
-    <div class="admin-card">
-        <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">📢 Post Campus Notice</h4>
-        <label style="font-size:11px; color:#94a3b8;">Target Session / Class:</label>
-        <select id="noticeTargetSession">
-            <option value="2026-27">Session 2026-27</option>
-            <option value="2025-26">Session 2025-26</option>
-            <option value="2024-25">Session 2024-25</option>
-        </select>
-        <input id="newNoticeTitle" placeholder="Notice Title (e.g., Mid-Term Exam Schedule)">
-        <input id="newNoticeDate" placeholder="Date (e.g., Oct 30, 2026)">
-        <textarea id="newNoticeContent" rows="2" placeholder="Notice details..."></textarea>
-        <button id="publishNoticeBtn" onclick="submitNewNotice()">Publish Notice</button>
+    <!-- Session Panel Container -->
+    <div id="teacherSessionPanel">
+        <!-- Dynamic Content Injected Here -->
     </div>
 </div>
 
@@ -642,9 +631,10 @@ button:active {
 <div id="toast" class="toast">Action notification</div>
 
 <script>
-let sheetURL = "https://script.google.com/macros/s/AKfycby2Uc532SidYt3brk8sbgWKGjs6eIGj1vIpCMuk1lWSMdCjooAWcuhZvx5SjpkqYaGA6w/exec";
+let sheetURL = "https://script.google.com/macros/s/AKfycbxHBasAXw9heQl1px_fTLiMBcM3QBHBS3E4mRL4YnVoxfKXM26IrkTeNScgByuLXFaXeA/exec";
 let studentName = "", studentRoll = "", studentSession = "2026-27";
 let teacherName = "";
+let currentTeacherSession = "2026-27";
 let allNotesData = [];
 
 function showToast(msg) {
@@ -666,6 +656,7 @@ window.onload = function() {
         document.getElementById('teacherWelcome').innerText = `🛠️ Welcome, ${teacherName}`;
         hideAllAuthForms();
         document.getElementById('adminDashboardDiv').classList.remove('hidden');
+        renderTeacherSessionPanel();
         return;
     }
 
@@ -902,6 +893,7 @@ function verifyAdminLogin() {
             document.getElementById('teacherWelcome').innerText = `🛠️ Welcome, ${teacherName}`;
             hideAllAuthForms();
             document.getElementById('adminDashboardDiv').classList.remove('hidden');
+            renderTeacherSessionPanel();
             showToast("Authenticated Successfully!");
         } else {
             showToast("Access Denied: Invalid Teacher credentials.");
@@ -919,11 +911,157 @@ function logoutAdmin() {
     location.reload();
 }
 
-function uploadPDFNote() {
-    let targetSession = document.getElementById('uploadTargetSession').value;
-    let title = document.getElementById('uploadNoteTitle').value.trim();
-    let info = document.getElementById('uploadNoteInfo').value.trim();
-    let fileInput = document.getElementById('pdfFileInput');
+function switchTeacherSession(sess) {
+    currentTeacherSession = sess;
+    let buttons = document.querySelectorAll('#adminDashboardDiv .tabs .tab-btn');
+    buttons.forEach(btn => {
+        if(btn.innerText.includes(sess)) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    renderTeacherSessionPanel();
+}
+
+function renderTeacherSessionPanel() {
+    let panel = document.getElementById('teacherSessionPanel');
+    panel.innerHTML = `
+        <div style="margin-bottom:12px; font-size:14px; color:#38bdf8; font-weight:700;">Managing Session: ${currentTeacherSession}</div>
+
+        <!-- Direct PDF Upload Section -->
+        <div class="admin-card">
+            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">📁 Upload PDF File to Session ${currentTeacherSession}</h4>
+            <input id="uploadNoteTitle_${currentTeacherSession}" placeholder="PDF Title (e.g., Physics Chapter 2.pdf)">
+            <input id="uploadNoteInfo_${currentTeacherSession}" placeholder="Details (e.g., Size: 2.1 MB)">
+            <input type="file" id="pdfFileInput_${currentTeacherSession}" accept="application/pdf" style="background:rgba(15,23,42,0.6); padding:10px;">
+            <button onclick="uploadPDFNoteFor('${currentTeacherSession}')">Upload & Publish PDF</button>
+        </div>
+
+        <!-- External Link Option -->
+        <div class="admin-card">
+            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">🔗 Add Note via Shareable Link (${currentTeacherSession})</h4>
+            <input id="newNoteTitle_${currentTeacherSession}" placeholder="PDF Title">
+            <input id="newNoteInfo_${currentTeacherSession}" placeholder="Details">
+            <input id="newNoteLink_${currentTeacherSession}" placeholder="Share Link">
+            <button onclick="submitNewNoteFor('${currentTeacherSession}')">Publish Link Note</button>
+        </div>
+
+        <!-- Notice Publishing Option -->
+        <div class="admin-card">
+            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">📢 Post Campus Notice (${currentTeacherSession})</h4>
+            <input id="newNoticeTitle_${currentTeacherSession}" placeholder="Notice Title">
+            <input id="newNoticeDate_${currentTeacherSession}" placeholder="Date (e.g., Oct 30, 2026)">
+            <textarea id="newNoticeContent_${currentTeacherSession}" rows="2" placeholder="Notice details..."></textarea>
+            <button onclick="submitNewNoticeFor('${currentTeacherSession}')">Publish Notice</button>
+        </div>
+
+        <!-- Manage Existing Notes & Notices -->
+        <div class="admin-card">
+            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">📚 Manage Notes (${currentTeacherSession})</h4>
+            <div id="manageNotesContainer_${currentTeacherSession}"><p style="color:#94a3b8; font-size:12px;">Loading notes...</p></div>
+        </div>
+
+        <div class="admin-card">
+            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">📢 Manage Notices (${currentTeacherSession})</h4>
+            <div id="manageNoticesContainer_${currentTeacherSession}"><p style="color:#94a3b8; font-size:12px;">Loading notices...</p></div>
+        </div>
+
+        <!-- Session Discussion Panel -->
+        <div class="admin-card">
+            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">💬 Student Discussions (${currentTeacherSession})</h4>
+            <div class="chat-box" id="teacherChatBox_${currentTeacherSession}">
+                <p style="color:#94a3b8; font-size:12px;">Loading discussions...</p>
+            </div>
+        </div>
+    `;
+
+    loadTeacherNotes(currentTeacherSession);
+    loadTeacherNotices(currentTeacherSession);
+    loadTeacherDiscussions(currentTeacherSession);
+}
+
+function loadTeacherNotes(sess) {
+    fetch(`${sheetURL}?action=getNotes&session=${encodeURIComponent(sess)}`)
+    .then(res => res.json())
+    .then(data => {
+        let container = document.getElementById(`manageNotesContainer_${sess}`);
+        container.innerHTML = "";
+        if (Array.isArray(data) && data.length > 0) {
+            data.forEach(note => {
+                let div = document.createElement('div');
+                div.style.cssText = "background:rgba(30,41,59,0.7); padding:10px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
+                div.innerHTML = `
+                    <div>
+                        <strong style="font-size:13px; color:#f8fafc;">${note.title}</strong><br>
+                        <span style="font-size:11px; color:#94a3b8;">${note.info || ''}</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn-small btn-view" onclick="window.open('${note.link}', '_blank')">View</button>
+                        <button class="btn-small btn-edit" onclick="editNotePrompt(${note.rowIndex}, '${note.title}', '${note.info}', '${note.link}', '${sess}')">Edit</button>
+                        <button class="btn-small btn-delete" onclick="deleteNoteItem(${note.rowIndex}, '${sess}')">Delete</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        } else {
+            container.innerHTML = "<p style='color:#94a3b8; font-size:12px;'>No notes published for this session yet.</p>";
+        }
+    });
+}
+
+function loadTeacherNotices(sess) {
+    fetch(`${sheetURL}?action=getAnnouncements&session=${encodeURIComponent(sess)}`)
+    .then(res => res.json())
+    .then(data => {
+        let container = document.getElementById(`manageNoticesContainer_${sess}`);
+        container.innerHTML = "";
+        if (Array.isArray(data) && data.length > 0) {
+            data.forEach(notice => {
+                let div = document.createElement('div');
+                div.style.cssText = "background:rgba(30,41,59,0.7); padding:10px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
+                div.innerHTML = `
+                    <div>
+                        <strong style="font-size:13px; color:#fbbf24;">${notice.title}</strong><br>
+                        <span style="font-size:11px; color:#94a3b8;">${notice.content}</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn-small btn-edit" onclick="editNoticePrompt(${notice.rowIndex}, '${notice.title}', '${notice.date}', '${notice.content}', '${sess}')">Edit</button>
+                        <button class="btn-small btn-delete" onclick="deleteNoticeItem(${notice.rowIndex}, '${sess}')">Delete</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        } else {
+            container.innerHTML = "<p style='color:#94a3b8; font-size:12px;'>No notices posted for this session yet.</p>";
+        }
+    });
+}
+
+function loadTeacherDiscussions(sess) {
+    fetch(`${sheetURL}?action=getChats&session=${encodeURIComponent(sess)}`)
+    .then(res => res.json())
+    .then(data => {
+        let chatBox = document.getElementById(`teacherChatBox_${sess}`);
+        chatBox.innerHTML = "";
+        if (Array.isArray(data) && data.length > 0) {
+            data.forEach(item => {
+                let div = document.createElement('div');
+                div.className = 'chat-msg';
+                div.innerHTML = `<div class="author"><span>${item.name} (${item.roll})</span><span>${item.time || ''}</span></div><div class="text">${item.message}</div>`;
+                chatBox.appendChild(div);
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
+        } else {
+            chatBox.innerHTML = "<p style='color:#94a3b8; font-size:12px; text-align:center;'>No messages in this session forum yet.</p>";
+        }
+    });
+}
+
+function uploadPDFNoteFor(sess) {
+    let title = document.getElementById(`uploadNoteTitle_${sess}`).value.trim();
+    let info = document.getElementById(`uploadNoteInfo_${sess}`).value.trim();
+    let fileInput = document.getElementById(`pdfFileInput_${sess}`);
 
     if(!title || fileInput.files.length === 0) {
         showToast("Enter title and select a PDF file");
@@ -931,133 +1069,110 @@ function uploadPDFNote() {
     }
 
     let file = fileInput.files[0];
-    let uploadBtn = document.getElementById('uploadPdfBtn');
-    uploadBtn.innerText = "Uploading to Drive...";
-    uploadBtn.disabled = true;
-
     let reader = new FileReader();
     reader.onload = function(e) {
-        let base64Data = e.target.result;
-        
         let payload = new URLSearchParams();
         payload.append("action", "uploadPDF");
-        payload.append("session", targetSession);
+        payload.append("session", sess);
         payload.append("title", title);
         payload.append("info", info || `Size: ${(file.size / (1024*1024)).toFixed(1)} MB | Added by ${teacherName}`);
         payload.append("fileName", file.name);
         payload.append("fileType", file.type);
-        payload.append("fileData", base64Data);
+        payload.append("fileData", e.target.result);
 
-        fetch(sheetURL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: payload.toString()
-        })
+        fetch(sheetURL, { method: "POST", mode: "no-cors", body: payload.toString() })
         .then(() => {
-            uploadBtn.innerText = "Upload & Publish PDF";
-            uploadBtn.disabled = false;
-            showToast(`PDF Published to Session ${targetSession}!`);
-            document.getElementById('uploadNoteTitle').value = "";
-            document.getElementById('uploadNoteInfo').value = "";
-            fileInput.value = "";
-        })
-        .catch(err => {
-            uploadBtn.innerText = "Upload & Publish PDF";
-            uploadBtn.disabled = false;
-            showToast("Upload Error. Try smaller file.");
-            console.error(err);
+            showToast(`PDF Published to Session ${sess}!`);
+            setTimeout(() => renderTeacherSessionPanel(), 1000);
         });
     };
     reader.readAsDataURL(file);
 }
 
-function submitNewNote() {
-    let targetSession = document.getElementById('linkTargetSession').value;
-    let title = document.getElementById('newNoteTitle').value.trim();
-    let info = document.getElementById('newNoteInfo').value.trim();
-    let link = document.getElementById('newNoteLink').value.trim();
+function submitNewNoteFor(sess) {
+    let title = document.getElementById(`newNoteTitle_${sess}`).value.trim();
+    let info = document.getElementById(`newNoteInfo_${sess}`).value.trim();
+    let link = document.getElementById(`newNoteLink_${sess}`).value.trim();
 
-    if(!title || !link) {
-        showToast("Title and Link are required");
-        return;
-    }
+    if(!title || !link) { showToast("Title and Link are required"); return; }
 
-    let btn = document.getElementById('publishLinkBtn');
-    btn.innerText = "Publishing...";
-    btn.disabled = true;
-
-    sendDataToSheet({
-        action: "addNote",
-        session: targetSession,
-        title: title,
-        info: info || `Added by ${teacherName}`,
-        link: link
-    });
-
-    setTimeout(() => {
-        btn.innerText = "Publish Link Note";
-        btn.disabled = false;
-        showToast(`Note Published to Session ${targetSession}!`);
-        document.getElementById('newNoteTitle').value = "";
-        document.getElementById('newNoteInfo').value = "";
-        document.getElementById('newNoteLink').value = "";
-    }, 1200);
+    sendDataToSheet({ action: "addNote", session: sess, title: title, info: info || `Added by ${teacherName}`, link: link });
+    showToast(`Note Published to Session ${sess}!`);
+    setTimeout(() => renderTeacherSessionPanel(), 1000);
 }
 
-function submitNewNotice() {
-    let targetSession = document.getElementById('noticeTargetSession').value;
-    let title = document.getElementById('newNoticeTitle').value.trim();
-    let date = document.getElementById('newNoticeDate').value.trim();
-    let content = document.getElementById('newNoticeContent').value.trim();
+function submitNewNoticeFor(sess) {
+    let title = document.getElementById(`newNoticeTitle_${sess}`).value.trim();
+    let date = document.getElementById(`newNoticeDate_${sess}`).value.trim();
+    let content = document.getElementById(`newNoticeContent_${sess}`).value.trim();
 
-    if(!title || !content) {
-        showToast("Title and Content are required");
-        return;
-    }
+    if(!title || !content) { showToast("Title and Content are required"); return; }
 
-    let btn = document.getElementById('publishNoticeBtn');
-    btn.innerText = "Publishing...";
-    btn.disabled = true;
-
-    sendDataToSheet({
-        action: "addNotice",
-        session: targetSession,
-        title: title,
-        date: date || "Recent",
-        content: content
-    });
-
-    setTimeout(() => {
-        btn.innerText = "Publish Notice";
-        btn.disabled = false;
-        showToast(`Notice Published to Session ${targetSession}!`);
-        document.getElementById('newNoticeTitle').value = "";
-        document.getElementById('newNoticeDate').value = "";
-        document.getElementById('newNoticeContent').value = "";
-    }, 1200);
+    sendDataToSheet({ action: "addNotice", session: sess, title: title, date: date || "Recent", content: content });
+    showToast(`Notice Published to Session ${sess}!`);
+    setTimeout(() => renderTeacherSessionPanel(), 1000);
 }
 
-function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById('notesTab').classList.add('hidden');
-    document.getElementById('noticesTab').classList.add('hidden');
-    document.getElementById('discussionTab').classList.add('hidden');
+function editNotePrompt(rowIndex, title, info, link, sess) {
+    let newTitle = prompt("Edit Note Title:", title);
+    if(newTitle === null) return;
+    let newInfo = prompt("Edit Note Info/Details:", info);
+    let newLink = prompt("Edit Note Link:", link);
 
-    if(tab === 'notes') {
-        document.querySelectorAll('.tab-btn')[0].classList.add('active');
-        document.getElementById('notesTab').classList.remove('hidden');
-    } else if(tab === 'notices') {
-        document.querySelectorAll('.tab-btn')[1].classList.add('active');
-        document.getElementById('noticesTab').classList.remove('hidden');
-        loadAnnouncementsFromSheet();
-    } else {
-        document.querySelectorAll('.tab-btn')[2].classList.add('active');
-        document.getElementById('discussionTab').classList.remove('hidden');
-        loadPreviousChats();
-    }
+    let payload = new URLSearchParams();
+    payload.append("action", "editNote");
+    payload.append("session", sess);
+    payload.append("rowIndex", rowIndex);
+    payload.append("title", newTitle);
+    payload.append("info", newInfo);
+    payload.append("link", newLink);
+
+    fetch(sheetURL, { method: "POST", mode: "no-cors", body: payload.toString() });
+    showToast("Note Updated Successfully!");
+    setTimeout(() => renderTeacherSessionPanel(), 1000);
+}
+
+function deleteNoteItem(rowIndex, sess) {
+    if(!confirm("Are you sure you want to delete this note?")) return;
+    let payload = new URLSearchParams();
+    payload.append("action", "deleteNote");
+    payload.append("session", sess);
+    payload.append("rowIndex", rowIndex);
+
+    fetch(sheetURL, { method: "POST", mode: "no-cors", body: payload.toString() });
+    showToast("Note Deleted.");
+    setTimeout(() => renderTeacherSessionPanel(), 1000);
+}
+
+function editNoticePrompt(rowIndex, title, date, content, sess) {
+    let newTitle = prompt("Edit Notice Title:", title);
+    if(newTitle === null) return;
+    let newDate = prompt("Edit Notice Date:", date);
+    let newContent = prompt("Edit Notice Content:", content);
+
+    let payload = new URLSearchParams();
+    payload.append("action", "editNotice");
+    payload.append("session", sess);
+    payload.append("rowIndex", rowIndex);
+    payload.append("title", newTitle);
+    payload.append("date", newDate);
+    payload.append("content", newContent);
+
+    fetch(sheetURL, { method: "POST", mode: "no-cors", body: payload.toString() });
+    showToast("Notice Updated Successfully!");
+    setTimeout(() => renderTeacherSessionPanel(), 1000);
+}
+
+function deleteNoticeItem(rowIndex, sess) {
+    if(!confirm("Are you sure you want to delete this notice?")) return;
+    let payload = new URLSearchParams();
+    payload.append("action", "deleteNotice");
+    payload.append("session", sess);
+    payload.append("rowIndex", rowIndex);
+
+    fetch(sheetURL, { method: "POST", mode: "no-cors", body: payload.toString() });
+    showToast("Notice Deleted.");
+    setTimeout(() => renderTeacherSessionPanel(), 1000);
 }
 
 function loadNotesFromSheet() {
@@ -1066,17 +1181,12 @@ function loadNotesFromSheet() {
     .then(data => {
         allNotesData = Array.isArray(data) ? data : [];
         renderNotes(allNotesData);
-    })
-    .catch(e => {
-        console.log("Notes fetch error:", e);
-        document.getElementById('notesListContainer').innerHTML = "<p style='color:#ef4444; font-size:12px;'>Error loading study notes.</p>";
     });
 }
 
 function renderNotes(notes) {
     let container = document.getElementById('notesListContainer');
     container.innerHTML = "";
-
     if (notes.length > 0) {
         notes.forEach(note => {
             let card = document.createElement('div');
@@ -1100,9 +1210,7 @@ function renderNotes(notes) {
 
 function filterNotes() {
     let query = document.getElementById('searchInput').value.toLowerCase().trim();
-    let filtered = allNotesData.filter(n => 
-        n.title.toLowerCase().includes(query) || (n.info && n.info.toLowerCase().includes(query))
-    );
+    let filtered = allNotesData.filter(n => n.title.toLowerCase().includes(query) || (n.info && n.info.toLowerCase().includes(query)));
     renderNotes(filtered);
 }
 
@@ -1112,29 +1220,17 @@ function loadAnnouncementsFromSheet() {
     .then(data => {
         let container = document.getElementById('noticesContainer');
         container.innerHTML = "";
-
         if (Array.isArray(data) && data.length > 0) {
             data.forEach(item => {
                 let card = document.createElement('div');
                 card.className = 'notice-card';
-                card.innerHTML = `
-                    <span class="notice-date">🗓️ ${item.date || 'Recent'}</span>
-                    <h4>${item.title}</h4>
-                    <p>${item.content}</p>
-                `;
+                card.innerHTML = `<span class="notice-date">🗓️ ${item.date || 'Recent'}</span><h4>${item.title}</h4><p>${item.content}</p>`;
                 container.appendChild(card);
             });
         } else {
-            container.innerHTML = `
-                <div class="notice-card">
-                    <span class="notice-date">📌 Official Notice</span>
-                    <h4>Welcome to Govt Boys Degree College Mach Portal (${studentSession})</h4>
-                    <p>Check back regularly for updates regarding class schedules, examination details, and new study materials for Session ${studentSession}.</p>
-                </div>
-            `;
+            container.innerHTML = `<div class="notice-card"><span class="notice-date">📌 Official Notice</span><h4>Welcome</h4><p>No new notices for Session ${studentSession}.</p></div>`;
         }
-    })
-    .catch(e => console.log("Notices fetch error:", e));
+    });
 }
 
 function loadPreviousChats() {
@@ -1142,12 +1238,7 @@ function loadPreviousChats() {
     .then(res => res.json())
     .then(data => {
         let chatBox = document.getElementById('chatBox');
-        chatBox.innerHTML = `
-            <div class="chat-msg">
-                <div class="author"><span>Admin / Teacher</span></div>
-                <div class="text">Welcome to the Session ${studentSession} discussion forum! Feel free to ask any question regarding your notes.</div>
-            </div>
-        `;
+        chatBox.innerHTML = `<div class="chat-msg"><div class="author"><span>Admin / Teacher</span></div><div class="text">Welcome to the Session ${studentSession} discussion forum!</div></div>`;
         if (Array.isArray(data)) {
             data.forEach(item => {
                 let div = document.createElement('div');
@@ -1157,30 +1248,17 @@ function loadPreviousChats() {
             });
             chatBox.scrollTop = chatBox.scrollHeight;
         }
-    })
-    .catch(e => console.log("Chat fetch error:", e));
+    });
 }
 
 function trackDownload(pdfName) {
     showToast(`Downloading: ${pdfName}`);
-    sendDataToSheet({
-        action: "download",
-        name: studentName,
-        roll: studentRoll,
-        session: studentSession,
-        pdfName: pdfName
-    });
+    sendDataToSheet({ action: "download", name: studentName, roll: studentRoll, session: studentSession, pdfName: pdfName });
 }
 
 function trackView(pdfName) {
     showToast(`Opening: ${pdfName}`);
-    sendDataToSheet({
-        action: "view",
-        name: studentName,
-        roll: studentRoll,
-        session: studentSession,
-        pdfName: pdfName
-    });
+    sendDataToSheet({ action: "view", name: studentName, roll: studentRoll, session: studentSession, pdfName: pdfName });
 }
 
 function postMessage() {
@@ -1195,14 +1273,7 @@ function postMessage() {
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
     
-    sendDataToSheet({
-        action: "chat",
-        name: studentName,
-        roll: studentRoll,
-        session: studentSession,
-        message: msg
-    });
-
+    sendDataToSheet({ action: "chat", name: studentName, roll: studentRoll, session: studentSession, message: msg });
     msgInput.value = "";
     updateCharCount();
     showToast("Message Posted");
