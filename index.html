@@ -705,14 +705,6 @@ function updateCharCount() {
     document.getElementById('charNum').innerText = len;
 }
 
-// Client-side secure SHA-256 password hashing
-async function hashPassword(password) {
-    const msgBuffer = new TextEncoder().encode(password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
 window.onload = function() {
     let checkFirebase = setInterval(() => {
         if (window.db && window.fs) {
@@ -781,7 +773,7 @@ function backToStudentLogin() {
     showStudentSignUp();
 }
 
-// --- SECURE STUDENT REGISTRATION WITH ROSTER CHECK ---
+// --- STUDENT REGISTRATION WITH DIRECT PASSWORD STORAGE ---
 async function signUpStudent() {
     let name = document.getElementById('signupName').value.trim();
     let roll = document.getElementById('signupRoll').value.trim();
@@ -826,13 +818,11 @@ async function signUpStudent() {
             return;
         }
 
-        const hashedPass = await hashPassword(pass);
-
         await window.fs.setDoc(studentRef, {
             name: name,
             roll: roll,
             session: assignedSession,
-            pass: hashedPass,
+            pass: pass,
             createdAt: window.fs.serverTimestamp()
         });
 
@@ -849,7 +839,7 @@ async function signUpStudent() {
     }
 }
 
-// --- SECURE STUDENT LOGIN ---
+// --- STUDENT LOGIN ---
 async function loginPortal() {
     let rollInput = document.getElementById('roll').value.trim();
     let passInput = document.getElementById('loginPass').value.trim();
@@ -867,10 +857,7 @@ async function loginPortal() {
         const studentRef = window.fs.doc(window.db, "students", rollInput);
         const docSnap = await window.fs.getDoc(studentRef);
 
-        // FIXED: Added 'await' here so the promise resolves to a hash string
-        const hashedInputPass = await hashPassword(passInput);
-
-        if (docSnap.exists() && docSnap.data().pass === hashedInputPass) {
+        if (docSnap.exists() && docSnap.data().pass === passInput) {
             const data = docSnap.data();
             studentName = data.name;
             studentRoll = data.roll;
@@ -930,11 +917,10 @@ async function signUpTeacher() {
     btn.disabled = true;
 
     try {
-        const hashedTeacherPass = await hashPassword(pass);
         const teacherRef = window.fs.doc(window.db, "teachers", name);
         await window.fs.setDoc(teacherRef, {
             name: name,
-            pass: hashedTeacherPass,
+            pass: pass,
             createdAt: window.fs.serverTimestamp()
         });
 
@@ -968,10 +954,7 @@ async function verifyAdminLogin() {
         const teacherRef = window.fs.doc(window.db, "teachers", name);
         const docSnap = await window.fs.getDoc(teacherRef);
 
-        // FIXED: Added 'await' here so the promise resolves to a hash string
-        const hashedInputPass = await hashPassword(pass);
-
-        if (docSnap.exists() && docSnap.data().pass === hashedInputPass) {
+        if (docSnap.exists() && docSnap.data().pass === pass) {
             teacherName = name;
             localStorage.setItem('mach_teacher_name', teacherName);
             document.getElementById('teacherWelcome').innerText = `🛠️ Welcome, ${teacherName}`;
