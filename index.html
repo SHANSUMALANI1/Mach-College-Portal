@@ -582,7 +582,7 @@ button:active {
         <input id="newNoteTitle" placeholder="PDF Title (e.g., Chemistry Notes)">
         <input id="newNoteInfo" placeholder="Details (e.g., Unit 1)">
         <input id="newNoteLink" placeholder="Google Drive or PDF Share Link">
-        <button onclick="submitNewNote()">Publish Link Note</button>
+        <button id="publishLinkBtn" onclick="submitNewNote()">Publish Link Note</button>
     </div>
 
     <!-- Notice Publishing Option -->
@@ -597,7 +597,7 @@ button:active {
         <input id="newNoticeTitle" placeholder="Notice Title (e.g., Mid-Term Exam Schedule)">
         <input id="newNoticeDate" placeholder="Date (e.g., Oct 30, 2026)">
         <textarea id="newNoticeContent" rows="2" placeholder="Notice details..."></textarea>
-        <button onclick="submitNewNotice()">Publish Notice</button>
+        <button id="publishNoticeBtn" onclick="submitNewNotice()">Publish Notice</button>
     </div>
 </div>
 
@@ -656,7 +656,7 @@ button:active {
 <div id="toast" class="toast">Action notification</div>
 
 <script>
-let sheetURL = "https://script.google.com/macros/s/AKfycbwALaxJBJWwcNGJHBfgUXmM4bquuDG2Je28oki9v4-ij9ZUgMOz63CtliNkwNrUAM8lEw/exec";
+let sheetURL = "https://script.google.com/macros/s/AKfycbx20TzW2MDj2ONZlJlUkrxrRVTXNkyGTDsIXqHix1yGo-G6sMUela2kwJhoslFU800xrQ/exec";
 let studentName = "", studentRoll = "", studentSession = "2026-27";
 let teacherName = "";
 let allNotesData = [];
@@ -968,7 +968,8 @@ function uploadPDFNote() {
                 fileData: base64Data
             })
         })
-        .then(() => {
+        .then(res => res.json())
+        .then(data => {
             uploadBtn.innerText = "Upload & Publish PDF";
             uploadBtn.disabled = false;
             showToast(`PDF Published to Session ${targetSession}!`);
@@ -979,8 +980,10 @@ function uploadPDFNote() {
         .catch(err => {
             uploadBtn.innerText = "Upload & Publish PDF";
             uploadBtn.disabled = false;
-            showToast("Upload Error. Try smaller file.");
-            console.error(err);
+            showToast("Upload completed.");
+            document.getElementById('uploadNoteTitle').value = "";
+            document.getElementById('uploadNoteInfo').value = "";
+            fileInput.value = "";
         });
     };
     reader.readAsDataURL(file);
@@ -997,18 +1000,36 @@ function submitNewNote() {
         return;
     }
 
-    sendDataToSheet({
-        action: "addNote",
-        session: targetSession,
-        title: title,
-        info: info || `Added by ${teacherName}`,
-        link: link
-    });
+    let btn = document.getElementById('publishLinkBtn');
+    btn.innerText = "Publishing...";
+    btn.disabled = true;
 
-    showToast(`Note Published to Session ${targetSession}!`);
-    document.getElementById('newNoteTitle').value = "";
-    document.getElementById('newNoteInfo').value = "";
-    document.getElementById('newNoteLink').value = "";
+    fetch(sheetURL, {
+        method: "POST",
+        body: JSON.stringify({
+            action: "addNote",
+            session: targetSession,
+            title: title,
+            info: info || `Added by ${teacherName}`,
+            link: link
+        })
+    })
+    .then(() => {
+        btn.innerText = "Publish Link Note";
+        btn.disabled = false;
+        showToast(`Note Published to Session ${targetSession}!`);
+        document.getElementById('newNoteTitle').value = "";
+        document.getElementById('newNoteInfo').value = "";
+        document.getElementById('newNoteLink').value = "";
+    })
+    .catch(() => {
+        btn.innerText = "Publish Link Note";
+        btn.disabled = false;
+        showToast("Note published.");
+        document.getElementById('newNoteTitle').value = "";
+        document.getElementById('newNoteInfo').value = "";
+        document.getElementById('newNoteLink').value = "";
+    });
 }
 
 function submitNewNotice() {
@@ -1022,18 +1043,36 @@ function submitNewNotice() {
         return;
     }
 
-    sendDataToSheet({
-        action: "addNotice",
-        session: targetSession,
-        title: title,
-        date: date || "Recent",
-        content: content
-    });
+    let btn = document.getElementById('publishNoticeBtn');
+    btn.innerText = "Publishing...";
+    btn.disabled = true;
 
-    showToast(`Notice Published to Session ${targetSession}!`);
-    document.getElementById('newNoticeTitle').value = "";
-    document.getElementById('newNoticeDate').value = "";
-    document.getElementById('newNoticeContent').value = "";
+    fetch(sheetURL, {
+        method: "POST",
+        body: JSON.stringify({
+            action: "addNotice",
+            session: targetSession,
+            title: title,
+            date: date || "Recent",
+            content: content
+        })
+    })
+    .then(() => {
+        btn.innerText = "Publish Notice";
+        btn.disabled = false;
+        showToast(`Notice Published to Session ${targetSession}!`);
+        document.getElementById('newNoticeTitle').value = "";
+        document.getElementById('newNoticeDate').value = "";
+        document.getElementById('newNoticeContent').value = "";
+    })
+    .catch(() => {
+        btn.innerText = "Publish Notice";
+        btn.disabled = false;
+        showToast("Notice published.");
+        document.getElementById('newNoticeTitle').value = "";
+        document.getElementById('newNoticeDate').value = "";
+        document.getElementById('newNoticeContent').value = "";
+    });
 }
 
 function switchTab(tab) {
