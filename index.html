@@ -803,7 +803,6 @@ async function signUpStudent() {
     btn.disabled = true;
 
     try {
-        // 1. Verify Roll Number exists in official Roster
         const rosterRef = window.fs.doc(window.db, "roster", roll);
         const rosterSnap = await window.fs.getDoc(rosterRef);
 
@@ -817,7 +816,6 @@ async function signUpStudent() {
         const rosterData = rosterSnap.data();
         const assignedSession = rosterData.session || "2026-27";
 
-        // 2. Check if account already exists
         const studentRef = window.fs.doc(window.db, "students", roll);
         const docSnap = await window.fs.getDoc(studentRef);
 
@@ -828,7 +826,6 @@ async function signUpStudent() {
             return;
         }
 
-        // 3. Hash password for absolute security
         const hashedPass = await hashPassword(pass);
 
         await window.fs.setDoc(studentRef, {
@@ -1150,9 +1147,9 @@ function renderTeacherSessionPanel() {
             <div id="manageNoticesContainer_${currentTeacherSession}"><p style="color:#94a3b8; font-size:12px;">Loading notices...</p></div>
         </div>
 
-        <!-- Session Discussion Panel -->
+        <!-- Session Discussion Panel with Delete Message Feature -->
         <div class="admin-card">
-            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">💬 Student Discussions & Teacher Reply (${currentTeacherSession})</h4>
+            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">💬 Student Discussions & Message Moderation (${currentTeacherSession})</h4>
             <div class="chat-box" id="teacherChatBox_${currentTeacherSession}">
                 <p style="color:#94a3b8; font-size:12px;">Loading discussions...</p>
             </div>
@@ -1246,7 +1243,7 @@ function subscribeTeacherRealtimeData(sess) {
         }
     });
 
-    // 4. Discussion & Teacher Chat Stream
+    // 4. Discussion & Teacher Chat Stream with Delete Message Button
     if(unsubscribeTeacherChats) unsubscribeTeacherChats();
     const chatQ = window.fs.query(
         window.fs.collection(window.db, "chats"), 
@@ -1260,9 +1257,17 @@ function subscribeTeacherRealtimeData(sess) {
         if (!snapshot.empty) {
             snapshot.forEach((docSnap) => {
                 let item = docSnap.data();
+                let chatId = docSnap.id;
                 let div = document.createElement('div');
                 div.className = 'chat-msg';
-                div.innerHTML = `<div class="author"><span>${item.name} (${item.roll})</span></div><div class="text">${item.message}</div>`;
+                div.style.cssText = "display:flex; justify-content:space-between; align-items:flex-start; gap:10px;";
+                div.innerHTML = `
+                    <div style="flex:1;">
+                        <div class="author"><span>${item.name} (${item.roll})</span></div>
+                        <div class="text">${item.message}</div>
+                    </div>
+                    <button class="btn-small btn-delete" style="width:auto; padding:4px 8px; font-size:10px; margin-top:0;" onclick="deleteChatMessage('${chatId}')">Delete</button>
+                `;
                 chatBox.appendChild(div);
             });
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -1300,6 +1305,19 @@ async function bulkImportRosterFor(sess) {
     }
     showToast(`Successfully imported ${count} students to Session ${sess}!`);
     document.getElementById(`bulkRosterInput_${sess}`).value = "";
+}
+
+// --- DELETE CHAT MESSAGE FUNCTION ---
+async function deleteChatMessage(chatId) {
+    if(!confirm("Are you sure you want to delete this student message?")) return;
+    try {
+        const chatRef = window.fs.doc(window.db, "chats", chatId);
+        await window.fs.deleteDoc(chatRef);
+        showToast("Message deleted successfully!");
+    } catch (e) {
+        console.error(e);
+        showToast("Error deleting message.");
+    }
 }
 
 // --- ACTION & CRUD FUNCTIONS ---
