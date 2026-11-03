@@ -867,6 +867,7 @@ async function loginPortal() {
         const studentRef = window.fs.doc(window.db, "students", rollInput);
         const docSnap = await window.fs.getDoc(studentRef);
 
+        // FIXED: Added 'await' here so the promise resolves to a hash string
         const hashedInputPass = await hashPassword(passInput);
 
         if (docSnap.exists() && docSnap.data().pass === hashedInputPass) {
@@ -967,6 +968,7 @@ async function verifyAdminLogin() {
         const teacherRef = window.fs.doc(window.db, "teachers", name);
         const docSnap = await window.fs.getDoc(teacherRef);
 
+        // FIXED: Added 'await' here so the promise resolves to a hash string
         const hashedInputPass = await hashPassword(pass);
 
         if (docSnap.exists() && docSnap.data().pass === hashedInputPass) {
