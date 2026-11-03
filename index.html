@@ -656,7 +656,7 @@ button:active {
 <div id="toast" class="toast">Action notification</div>
 
 <script>
-let sheetURL = "https://script.google.com/macros/s/AKfycbx20TzW2MDj2ONZlJlUkrxrRVTXNkyGTDsIXqHix1yGo-G6sMUela2kwJhoslFU800xrQ/exec";
+let sheetURL = "https://script.google.com/macros/s/AKfycbzo6HLhHVJtn6t0TGi4KFJm5UGKnE_T3ApWjQz3Sf9qXrqJT-1bIzXTMAKyP6KOaWqz7g/exec";
 let studentName = "", studentRoll = "", studentSession = "2026-27";
 let teacherName = "";
 let allNotesData = [];
@@ -956,20 +956,24 @@ function uploadPDFNote() {
     reader.onload = function(e) {
         let base64Data = e.target.result;
         
+        let payload = new URLSearchParams();
+        payload.append("action", "uploadPDF");
+        payload.append("session", targetSession);
+        payload.append("title", title);
+        payload.append("info", info || `Size: ${(file.size / (1024*1024)).toFixed(1)} MB | Added by ${teacherName}`);
+        payload.append("fileName", file.name);
+        payload.append("fileType", file.type);
+        payload.append("fileData", base64Data);
+
         fetch(sheetURL, {
             method: "POST",
-            body: JSON.stringify({
-                action: "uploadPDF",
-                session: targetSession,
-                title: title,
-                info: info || `Size: ${(file.size / (1024*1024)).toFixed(1)} MB | Added by ${teacherName}`,
-                fileName: file.name,
-                fileType: file.type,
-                fileData: base64Data
-            })
+            mode: "no-cors",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: payload.toString()
         })
-        .then(res => res.json())
-        .then(data => {
+        .then(() => {
             uploadBtn.innerText = "Upload & Publish PDF";
             uploadBtn.disabled = false;
             showToast(`PDF Published to Session ${targetSession}!`);
@@ -980,10 +984,8 @@ function uploadPDFNote() {
         .catch(err => {
             uploadBtn.innerText = "Upload & Publish PDF";
             uploadBtn.disabled = false;
-            showToast("Upload completed.");
-            document.getElementById('uploadNoteTitle').value = "";
-            document.getElementById('uploadNoteInfo').value = "";
-            fileInput.value = "";
+            showToast("Upload Error. Try smaller file.");
+            console.error(err);
         });
     };
     reader.readAsDataURL(file);
@@ -1004,32 +1006,22 @@ function submitNewNote() {
     btn.innerText = "Publishing...";
     btn.disabled = true;
 
-    fetch(sheetURL, {
-        method: "POST",
-        body: JSON.stringify({
-            action: "addNote",
-            session: targetSession,
-            title: title,
-            info: info || `Added by ${teacherName}`,
-            link: link
-        })
-    })
-    .then(() => {
+    sendDataToSheet({
+        action: "addNote",
+        session: targetSession,
+        title: title,
+        info: info || `Added by ${teacherName}`,
+        link: link
+    });
+
+    setTimeout(() => {
         btn.innerText = "Publish Link Note";
         btn.disabled = false;
         showToast(`Note Published to Session ${targetSession}!`);
         document.getElementById('newNoteTitle').value = "";
         document.getElementById('newNoteInfo').value = "";
         document.getElementById('newNoteLink').value = "";
-    })
-    .catch(() => {
-        btn.innerText = "Publish Link Note";
-        btn.disabled = false;
-        showToast("Note published.");
-        document.getElementById('newNoteTitle').value = "";
-        document.getElementById('newNoteInfo').value = "";
-        document.getElementById('newNoteLink').value = "";
-    });
+    }, 1200);
 }
 
 function submitNewNotice() {
@@ -1047,32 +1039,22 @@ function submitNewNotice() {
     btn.innerText = "Publishing...";
     btn.disabled = true;
 
-    fetch(sheetURL, {
-        method: "POST",
-        body: JSON.stringify({
-            action: "addNotice",
-            session: targetSession,
-            title: title,
-            date: date || "Recent",
-            content: content
-        })
-    })
-    .then(() => {
+    sendDataToSheet({
+        action: "addNotice",
+        session: targetSession,
+        title: title,
+        date: date || "Recent",
+        content: content
+    });
+
+    setTimeout(() => {
         btn.innerText = "Publish Notice";
         btn.disabled = false;
         showToast(`Notice Published to Session ${targetSession}!`);
         document.getElementById('newNoticeTitle').value = "";
         document.getElementById('newNoticeDate').value = "";
         document.getElementById('newNoticeContent').value = "";
-    })
-    .catch(() => {
-        btn.innerText = "Publish Notice";
-        btn.disabled = false;
-        showToast("Notice published.");
-        document.getElementById('newNoticeTitle').value = "";
-        document.getElementById('newNoticeDate').value = "";
-        document.getElementById('newNoticeContent').value = "";
-    });
+    }, 1200);
 }
 
 function switchTab(tab) {
