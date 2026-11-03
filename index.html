@@ -1149,27 +1149,39 @@ function editNotePrompt(rowIndex, encTitle, encInfo, encLink, sess) {
     let newInfo = prompt("Edit Note Info/Details:", info);
     let newLink = prompt("Edit Note Link:", link);
 
-    let payload = new URLSearchParams();
-    payload.append("action", "editNote");
-    payload.append("session", sess);
-    payload.append("rowIndex", rowIndex);
-    payload.append("title", newTitle);
-    payload.append("info", newInfo);
-    payload.append("link", newLink);
+    let payload = {
+        action: "editNote",
+        session: sess,
+        rowIndex: rowIndex,
+        title: newTitle,
+        info: newInfo,
+        link: newLink
+    };
 
-    fetch(sheetURL, { method: "POST", mode: "no-cors", body: payload.toString() });
+    fetch(sheetURL, { 
+        method: "POST", 
+        mode: "no-cors", 
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(payload).toString() 
+    });
     showToast("Note Updated Successfully!");
     setTimeout(() => renderTeacherSessionPanel(), 1000);
 }
 
 function deleteNoteItem(rowIndex, sess) {
     if(!confirm("Are you sure you want to delete this note?")) return;
-    let payload = new URLSearchParams();
-    payload.append("action", "deleteNote");
-    payload.append("session", sess);
-    payload.append("rowIndex", rowIndex);
+    let payload = {
+        action: "deleteNote",
+        session: sess,
+        rowIndex: rowIndex
+    };
 
-    fetch(sheetURL, { method: "POST", mode: "no-cors", body: payload.toString() });
+    fetch(sheetURL, { 
+        method: "POST", 
+        mode: "no-cors", 
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(payload).toString() 
+    });
     showToast("Note Deleted.");
     setTimeout(() => renderTeacherSessionPanel(), 1000);
 }
@@ -1184,27 +1196,39 @@ function editNoticePrompt(rowIndex, encTitle, encDate, encContent, sess) {
     let newDate = prompt("Edit Notice Date:", date);
     let newContent = prompt("Edit Notice Content:", content);
 
-    let payload = new URLSearchParams();
-    payload.append("action", "editNotice");
-    payload.append("session", sess);
-    payload.append("rowIndex", rowIndex);
-    payload.append("title", newTitle);
-    payload.append("date", newDate);
-    payload.append("content", newContent);
+    let payload = {
+        action: "editNotice",
+        session: sess,
+        rowIndex: rowIndex,
+        title: newTitle,
+        date: newDate,
+        content: newContent
+    };
 
-    fetch(sheetURL, { method: "POST", mode: "no-cors", body: payload.toString() });
+    fetch(sheetURL, { 
+        method: "POST", 
+        mode: "no-cors", 
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(payload).toString() 
+    });
     showToast("Notice Updated Successfully!");
     setTimeout(() => renderTeacherSessionPanel(), 1000);
 }
 
 function deleteNoticeItem(rowIndex, sess) {
     if(!confirm("Are you sure you want to delete this notice?")) return;
-    let payload = new URLSearchParams();
-    payload.append("action", "deleteNotice");
-    payload.append("session", sess);
-    payload.append("rowIndex", rowIndex);
+    let payload = {
+        action: "deleteNotice",
+        session: sess,
+        rowIndex: rowIndex
+    };
 
-    fetch(sheetURL, { method: "POST", mode: "no-cors", body: payload.toString() });
+    fetch(sheetURL, { 
+        method: "POST", 
+        mode: "no-cors", 
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(payload).toString() 
+    });
     showToast("Notice Deleted.");
     setTimeout(() => renderTeacherSessionPanel(), 1000);
 }
