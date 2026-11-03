@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Student Portal - Government Boys Degree College Mach</title>
+
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,7 +45,7 @@
 <style>
 * {
     box-sizing: border-box;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -52,13 +53,13 @@ body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background: #070d19;
     background-image: 
-        radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.12) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
-        radial-gradient(at 50% 50%, rgba(15, 23, 42, 0.5) 0px, transparent 100%);
+        radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(15, 23, 42, 0.7) 0px, transparent 100%);
     background-attachment: fixed;
     min-height: 100vh;
     margin: 0;
-    padding: 16px 12px;
+    padding: 12px 10px;
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -68,30 +69,75 @@ body {
 .container {
     width: 100%;
     max-width: 650px;
-    background: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    padding: 24px;
-    border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(6, 182, 212, 0.05);
+    background: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    padding: 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 35px rgba(6, 182, 212, 0.08);
     position: relative;
     overflow: hidden;
-    margin-top: 5px;
+    margin-top: 2px;
+}
+
+/* Top Admin Header Quick Access */
+.top-admin-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(6, 182, 212, 0.08);
+    border: 1px solid rgba(6, 182, 212, 0.2);
+    padding: 8px 12px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+}
+
+.top-admin-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #38bdf8;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.top-admin-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-top-admin {
+    padding: 6px 10px;
+    font-size: 11px;
+    border-radius: 8px;
+    background: rgba(30, 41, 59, 0.8);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    margin-top: 0;
+    width: auto;
+    box-shadow: none;
+}
+
+.btn-top-admin:hover {
+    background: #06b6d4;
+    color: #0f172a;
 }
 
 .hero-header {
     position: relative;
     width: 100%;
-    height: 195px;
-    border-radius: 18px;
+    height: 165px;
+    border-radius: 16px;
     overflow: hidden;
-    margin-bottom: 22px;
+    margin-bottom: 18px;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: flex-end;
-    padding: 18px;
+    padding: 14px;
 }
 
 .college-banner {
@@ -111,7 +157,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(180deg, rgba(7, 13, 25, 0.2) 0%, rgba(7, 13, 25, 0.75) 50%, rgba(7, 13, 25, 0.95) 100%);
+    background: linear-gradient(180deg, rgba(7, 13, 25, 0.15) 0%, rgba(7, 13, 25, 0.75) 50%, rgba(7, 13, 25, 0.95) 100%);
     z-index: 2;
 }
 
@@ -120,17 +166,17 @@ body {
     z-index: 3;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     width: 100%;
 }
 
 .hero-logo {
-    width: 52px;
-    height: 52px;
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #06b6d4;
-    box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
     background: rgba(15, 23, 42, 0.8);
     flex-shrink: 0;
 }
@@ -143,7 +189,7 @@ body {
 .hero-text h2 {
     margin: 0;
     font-family: 'Poppins', sans-serif;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     color: #f8fafc;
     letter-spacing: 0.3px;
@@ -152,7 +198,7 @@ body {
 }
 
 .sub-tagline {
-    font-size: 10px;
+    font-size: 9.5px;
     color: #38bdf8;
     margin-top: 3px;
     font-weight: 600;
@@ -169,13 +215,13 @@ h2, h3 {
 
 input, textarea, select {
     width: 100%;
-    padding: 13px 16px;
-    margin: 8px 0;
-    border-radius: 12px;
+    padding: 12px 14px;
+    margin: 6px 0 10px 0;
+    border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    font-size: 14px;
+    font-size: 13.5px;
     outline: none;
-    background: rgba(30, 41, 59, 0.7);
+    background: rgba(30, 41, 59, 0.75);
     color: #f8fafc;
     font-family: inherit;
 }
@@ -187,27 +233,27 @@ input::placeholder, textarea::placeholder {
 input:focus, textarea:focus, select:focus {
     border-color: #06b6d4;
     background: rgba(30, 41, 59, 0.95);
-    box-shadow: 0 0 15px rgba(6, 182, 212, 0.25);
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.25);
 }
 
 button {
     width: 100%;
-    padding: 13px;
+    padding: 12px;
     background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
     color: white;
     border: none;
-    border-radius: 12px;
-    font-size: 14px;
+    border-radius: 10px;
+    font-size: 13.5px;
     font-weight: 600;
     font-family: 'Poppins', sans-serif;
     cursor: pointer;
-    margin-top: 10px;
-    box-shadow: 0 4px 20px rgba(6, 182, 212, 0.3);
+    margin-top: 6px;
+    box-shadow: 0 4px 18px rgba(6, 182, 212, 0.3);
     letter-spacing: 0.3px;
 }
 
 button:hover {
-    box-shadow: 0 6px 25px rgba(6, 182, 212, 0.45);
+    box-shadow: 0 6px 22px rgba(6, 182, 212, 0.45);
     transform: translateY(-1px);
 }
 
@@ -218,7 +264,7 @@ button:active {
 .btn-logout {
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     font-size: 11px;
-    padding: 6px 14px;
+    padding: 6px 12px;
     width: auto;
     margin-top: 0;
     box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
@@ -240,92 +286,156 @@ button:active {
     display: none !important;
 }
 
+/* Segmented Control Pill Tabs */
+.segmented-control {
+    display: flex;
+    background: rgba(30, 41, 59, 0.8);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 16px;
+    gap: 4px;
+}
+
+.segmented-btn {
+    flex: 1;
+    padding: 9px;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 0;
+    box-shadow: none;
+    text-align: center;
+}
+
+.segmented-btn.active {
+    background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 10px rgba(6, 182, 212, 0.3);
+}
+
 .tabs {
     display: flex;
-    gap: 8px;
-    margin-bottom: 18px;
+    gap: 6px;
+    margin-bottom: 14px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding-bottom: 10px;
+    padding-bottom: 8px;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .tab-btn {
     flex: 1;
     background: rgba(30, 41, 59, 0.6);
     color: #94a3b8;
-    padding: 10px 12px;
-    border-radius: 12px;
+    padding: 9px 10px;
+    border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     font-weight: 600;
-    font-size: 12px;
+    font-size: 11.5px;
     cursor: pointer;
     box-shadow: none;
     margin-top: 0;
     white-space: nowrap;
     position: relative;
+    text-align: center;
 }
 
 .tab-btn.active {
     background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
     color: #ffffff;
     border-color: transparent;
-    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.35);
+    box-shadow: 0 3px 12px rgba(6, 182, 212, 0.35);
+}
+
+/* Sub-Tab Navigation for Teacher Control Panel */
+.sub-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.sub-tab-btn {
+    padding: 8px 12px;
+    background: rgba(30, 41, 59, 0.5);
+    color: #94a3b8;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-top: 0;
+    width: auto;
+    box-shadow: none;
+}
+
+.sub-tab-btn.active {
+    background: rgba(6, 182, 212, 0.2);
+    color: #38bdf8;
+    border-color: rgba(6, 182, 212, 0.5);
 }
 
 .notif-dot {
     position: absolute;
-    top: 8px;
-    right: 10px;
-    width: 8px;
-    height: 8px;
+    top: 6px;
+    right: 8px;
+    width: 7px;
+    height: 7px;
     background-color: #38bdf8;
     border-radius: 50%;
-    box-shadow: 0 0 10px #38bdf8, 0 0 5px #06b6d4;
+    box-shadow: 0 0 8px #38bdf8;
     animation: pulseGlow 1.5s infinite;
 }
 
 @keyframes pulseGlow {
-    0% { transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
-    70% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 0 6px rgba(56, 189, 248, 0); }
-    100% { transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+    0% { transform: scale(0.95); opacity: 0.8; }
+    70% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.8; }
 }
 
 .search-box {
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     position: relative;
 }
 
 .search-box input {
-    padding-left: 38px;
+    padding-left: 36px;
     margin: 0;
-    font-size: 13px;
-    border-radius: 12px;
+    font-size: 12.5px;
+    border-radius: 10px;
 }
 
 .search-icon {
     position: absolute;
-    left: 14px;
+    left: 12px;
     top: 50%;
     transform: translateY(-50%);
     color: #64748b;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .pdf-card {
     background: rgba(30, 41, 59, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 14px 16px;
-    border-radius: 14px;
-    margin-bottom: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    margin-bottom: 10px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     backdrop-filter: blur(10px);
 }
 
 .pdf-card:hover {
     border-color: rgba(6, 182, 212, 0.4);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
 }
 
 @media(min-width: 480px) {
@@ -337,21 +447,21 @@ button:active {
 }
 
 .pdf-info h4 {
-    margin: 0 0 4px 0;
-    font-size: 14px;
+    margin: 0 0 3px 0;
+    font-size: 13.5px;
     color: #f8fafc;
     line-height: 1.3;
 }
 
 .pdf-info p {
     margin: 0;
-    font-size: 11px;
+    font-size: 10.5px;
     color: #94a3b8;
 }
 
 .pdf-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     width: 100%;
 }
 
@@ -363,9 +473,9 @@ button:active {
 
 .btn-small {
     flex: 1;
-    padding: 8px 14px;
-    font-size: 12px;
-    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 11.5px;
+    border-radius: 7px;
     text-decoration: none;
     display: inline-block;
     font-weight: 600;
@@ -420,34 +530,34 @@ button:active {
 }
 
 .chat-box {
-    height: 270px;
+    height: 260px;
     overflow-y: auto;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
-    padding: 12px;
+    border-radius: 12px;
+    padding: 10px;
     background: rgba(15, 23, 42, 0.6);
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .chat-msg {
     background: rgba(30, 41, 59, 0.8);
-    padding: 10px 12px;
-    border-radius: 12px;
-    margin-bottom: 10px;
+    padding: 9px 11px;
+    border-radius: 10px;
+    margin-bottom: 8px;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .chat-msg .author {
     font-weight: 700;
-    font-size: 11px;
+    font-size: 10.5px;
     color: #38bdf8;
     display: flex;
     justify-content: space-between;
 }
 
 .chat-msg .text {
-    font-size: 13px;
-    margin-top: 4px;
+    font-size: 12.5px;
+    margin-top: 3px;
     color: #e2e8f0;
     word-break: break-word;
 }
@@ -458,28 +568,28 @@ button:active {
     border-top: 1px solid rgba(245, 158, 11, 0.15);
     border-right: 1px solid rgba(245, 158, 11, 0.15);
     border-bottom: 1px solid rgba(245, 158, 11, 0.15);
-    padding: 14px;
-    border-radius: 12px;
-    margin-bottom: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
 }
 
 .notice-card h4 {
-    margin: 0 0 6px 0;
-    font-size: 14px;
+    margin: 0 0 5px 0;
+    font-size: 13.5px;
     color: #fbbf24;
 }
 
 .notice-card p {
     margin: 0;
-    font-size: 12px;
+    font-size: 11.5px;
     color: #fef3c7;
     line-height: 1.4;
 }
 
 .notice-date {
-    font-size: 10px;
+    font-size: 9.5px;
     color: #f59e0b;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     display: block;
     font-weight: 600;
 }
@@ -487,22 +597,22 @@ button:active {
 .admin-card {
     background: rgba(6, 182, 212, 0.06);
     border: 1px solid rgba(6, 182, 212, 0.2);
-    padding: 16px;
-    border-radius: 14px;
-    margin-bottom: 14px;
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 12px;
     position: relative;
 }
 
 .toast {
     position: fixed;
-    bottom: 24px;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     background: #06b6d4;
     color: #0f172a;
-    padding: 11px 22px;
+    padding: 10px 20px;
     border-radius: 30px;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 700;
     box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
     z-index: 1000;
@@ -516,17 +626,26 @@ button:active {
 }
 
 .char-counter {
-    font-size: 10px;
+    font-size: 9.5px;
     color: #64748b;
     text-align: right;
-    margin-top: -4px;
-    margin-bottom: 8px;
+    margin-top: -3px;
+    margin-bottom: 6px;
 }
 </style>
 </head>
 <body>
 
 <div class="container">
+
+<!-- Global Top Bar for Admin Login Quick Access (Visible on Authentication Forms) -->
+<div id="topAdminBar" class="top-admin-bar">
+    <span class="top-admin-title">Faculty Access</span>
+    <div class="top-admin-actions">
+        <button class="btn-top-admin" onclick="openAdminLogin()">🔐 Admin Login</button>
+        <button class="btn-top-admin" onclick="openAdminSignUp()">📝 Admin Register</button>
+    </div>
+</div>
 
 <!-- Hero Header Banner -->
 <div class="hero-header">
@@ -541,76 +660,68 @@ button:active {
     </div>
 </div>
 
+<!-- Student Auth Mode Switcher (Visible when student login/signup is active) -->
+<div id="studentAuthSwitcher" class="segmented-control">
+    <button id="switchBtnLogin" class="segmented-btn active" onclick="showStudentLogin()">👤 Student Login</button>
+    <button id="switchBtnSignUp" class="segmented-btn" onclick="showStudentSignUp()">📝 Student Register</button>
+</div>
+
 <!-- Student Sign Up Screen -->
-<div id="signUpDiv">
-    <h3 style="font-size:16px; margin-bottom:8px;">Student Account Registration</h3>
-    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your Name and Official Roll No to create a password.</p>
+<div id="signUpDiv" class="hidden">
+    <h3 style="font-size:15px; margin-bottom:4px;">Student Registration</h3>
+    <p style="font-size:11.5px; color:#94a3b8; margin-top:0; margin-bottom:12px;">Enter your Name and Official Roll No to create a password.</p>
     
     <input id="signupName" placeholder="Full Student Name (as per roster)">
     <input id="signupRoll" placeholder="Official Roll No (e.g., 101)">
     <input type="password" id="signupPass" placeholder="Create Password">
     <input type="password" id="signupConfirmPass" placeholder="Re-enter Password">
-    <button id="signupBtn" onclick="signUpStudent()">Create Account</button>
-
-    <div style="text-align:center; margin-top:16px; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;">
-        <span style="font-size:12px; color:#94a3b8;">Already created an account? </span>
-        <a href="javascript:void(0)" onclick="showStudentLogin()" style="font-size:12px; color:#38bdf8; text-decoration:none; font-weight:600;">Log In Here</a>
-        <br><br>
-        <a href="javascript:void(0)" onclick="openAdminSignUp()" style="font-size:12px; color:#38bdf8; text-decoration:none; font-weight:600;">🔐 Teacher / Admin Access</a>
-    </div>
+    <button id="signupBtn" onclick="signUpStudent()">Create Student Account</button>
 </div>
 
 <!-- Student Login Screen -->
-<div id="loginDiv" class="hidden">
-    <h3 style="font-size:16px; margin-bottom:8px;">Student Login</h3>
-    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your Roll No and Password to log in.</p>
+<div id="loginDiv">
+    <h3 style="font-size:15px; margin-bottom:4px;">Student Login</h3>
+    <p style="font-size:11.5px; color:#94a3b8; margin-top:0; margin-bottom:12px;">Enter your Roll No and Password to log in.</p>
 
     <input id="roll" placeholder="Official Roll No (e.g., 101)">
     <input type="password" id="loginPass" placeholder="Password">
     <button id="loginBtn" onclick="loginPortal()">Access Portal</button>
-
-    <div style="text-align:center; margin-top:16px; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;">
-        <span style="font-size:12px; color:#94a3b8;">Don't have an account? </span>
-        <a href="javascript:void(0)" onclick="showStudentSignUp()" style="font-size:12px; color:#38bdf8; text-decoration:none; font-weight:600;">Sign Up First</a>
-        <br><br>
-        <a href="javascript:void(0)" onclick="openAdminSignUp()" style="font-size:12px; color:#38bdf8; text-decoration:none; font-weight:600;">🔐 Teacher / Admin Access</a>
-    </div>
 </div>
 
 <!-- Teacher Sign Up Screen -->
 <div id="adminSignUpDiv" class="hidden">
-    <h3 style="font-size:16px; margin-bottom:8px; color:#38bdf8;">Teacher Account Registration</h3>
-    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your Teacher Name and set your account password.</p>
+    <h3 style="font-size:15px; margin-bottom:4px; color:#38bdf8;">Teacher Account Registration</h3>
+    <p style="font-size:11.5px; color:#94a3b8; margin-top:0; margin-bottom:12px;">Enter your Teacher Name and set your account password.</p>
     <input id="adminSignUpName" placeholder="Teacher Name">
     <input type="password" id="adminSignUpPass" placeholder="Create Password">
     <input type="password" id="adminSignUpConfirmPass" placeholder="Re-enter Password">
     <button id="adminSignUpBtn" onclick="signUpTeacher()">Create Teacher Account</button>
     
-    <div style="text-align:center; margin-top:14px;">
-        <a href="javascript:void(0)" onclick="openAdminLogin()" style="font-size:12px; color:#38bdf8; text-decoration:none; font-weight:600;">Already have a Teacher Account? Log In</a>
+    <div style="text-align:center; margin-top:12px;">
+        <a href="javascript:void(0)" onclick="openAdminLogin()" style="font-size:11.5px; color:#38bdf8; text-decoration:none; font-weight:600;">Already have a Teacher Account? Log In</a>
         <br><br>
-        <a href="javascript:void(0)" onclick="backToStudentLogin()" style="font-size:12px; color:#94a3b8; text-decoration:none;">Back to Student Sign Up</a>
+        <button class="btn-secondary" onclick="backToStudentLogin()" style="margin-top:4px;">Back to Student Auth</button>
     </div>
 </div>
 
 <!-- Teacher Login Screen -->
 <div id="adminLoginDiv" class="hidden">
-    <h3 style="font-size:16px; margin-bottom:8px; color:#38bdf8;">Teacher / Admin Authentication</h3>
-    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your teacher name and password.</p>
+    <h3 style="font-size:15px; margin-bottom:4px; color:#38bdf8;">Teacher / Admin Authentication</h3>
+    <p style="font-size:11.5px; color:#94a3b8; margin-top:0; margin-bottom:12px;">Enter your teacher credentials.</p>
     <input id="adminNameInput" placeholder="Teacher Name">
     <input type="password" id="adminPassInput" placeholder="Password">
     <button id="adminLoginBtn" onclick="verifyAdminLogin()">Login as Teacher</button>
     
-    <div style="text-align:center; margin-top:14px;">
-        <a href="javascript:void(0)" onclick="openAdminSignUp()" style="font-size:12px; color:#38bdf8; text-decoration:none; font-weight:600;">Need a Teacher Account? Sign Up</a>
+    <div style="text-align:center; margin-top:12px;">
+        <a href="javascript:void(0)" onclick="openAdminSignUp()" style="font-size:11.5px; color:#38bdf8; text-decoration:none; font-weight:600;">Need a Teacher Account? Sign Up</a>
     </div>
-    <button class="btn-secondary" onclick="backToStudentLogin()" style="margin-top:10px;">Back to Student Portal</button>
+    <button class="btn-secondary" onclick="backToStudentLogin()" style="margin-top:8px;">Back to Student Auth</button>
 </div>
 
 <!-- Admin Dashboard Screen -->
 <div id="adminDashboardDiv" class="hidden">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.2); padding:10px 14px; border-radius:12px;">
-        <span id="teacherWelcome" style="font-weight:600; font-size:13px; color:#38bdf8;">🛠️ Teacher Control Panel</span>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.2); padding:8px 12px; border-radius:10px;">
+        <span id="teacherWelcome" style="font-weight:600; font-size:12px; color:#38bdf8;">🛠️ Teacher Control Panel</span>
         <button class="btn-logout" onclick="logoutAdmin()">Exit Admin</button>
     </div>
 
@@ -621,20 +732,28 @@ button:active {
         <button class="tab-btn" onclick="switchTeacherSession('2024-25')">Session 2024-25 <span id="teacherTabNotif_2024-25"></span></button>
     </div>
 
+    <!-- Sub-tab Navigation for Teacher tools -->
+    <div class="sub-tabs">
+        <button class="sub-tab-btn active" id="subTabRoster" onclick="switchTeacherSubTab('roster')">📥 Roster & Students</button>
+        <button class="sub-tab-btn" id="subTabNotes" onclick="switchTeacherSubTab('notes')">📁 Upload & Notes</button>
+        <button class="sub-tab-btn" id="subTabNotices" onclick="switchTeacherSubTab('notices')">📢 Notices</button>
+        <button class="sub-tab-btn" id="subTabChats" onclick="switchTeacherSubTab('chats')">💬 Moderation & Forum</button>
+    </div>
+
     <!-- Session Panel Container -->
     <div id="teacherSessionPanel">
         <!-- Dynamic Content Injected Here -->
     </div>
 </div>
 
-<!-- Portal Screen -->
+<!-- Student Portal Main Screen -->
 <div id="portalDiv" class="hidden">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; background:rgba(30,41,59,0.5); border:1px solid rgba(255,255,255,0.08); padding:10px 14px; border-radius:12px;">
-        <span id="userWelcome" style="font-weight:600; font-size:13px; color:#f8fafc;"></span>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; background:rgba(30,41,59,0.5); border:1px solid rgba(255,255,255,0.08); padding:8px 12px; border-radius:10px;">
+        <span id="userWelcome" style="font-weight:600; font-size:12px; color:#f8fafc;"></span>
         <button class="btn-logout" onclick="logoutPortal()">Logout</button>
     </div>
 
-    <!-- Navigation Tabs -->
+    <!-- Student Navigation Tabs -->
     <div class="tabs">
         <button class="tab-btn active" id="navBtnNotes" onclick="switchTab('notes')">📚 Notes <span id="notifNotes" class="hidden notif-dot"></span></button>
         <button class="tab-btn" id="navBtnNotices" onclick="switchTab('notices')">📢 Notices <span id="notifNotices" class="hidden notif-dot"></span></button>
@@ -648,21 +767,21 @@ button:active {
             <input id="searchInput" onkeyup="filterNotes()" placeholder="Search chapter, subject or title...">
         </div>
         <div id="notesListContainer">
-            <p style="color:#94a3b8; font-size:13px; text-align:center;">Loading latest study notes...</p>
+            <p style="color:#94a3b8; font-size:12px; text-align:center;">Loading latest study notes...</p>
         </div>
     </div>
 
     <!-- Section 2: Notices Portion -->
     <div id="noticesTab" class="hidden">
-        <h3 style="font-size:15px; margin-bottom:12px;">Campus Announcements</h3>
+        <h3 style="font-size:14px; margin-bottom:10px;">Campus Announcements</h3>
         <div id="noticesContainer">
-            <p style="color:#94a3b8; font-size:13px; text-align:center;">Loading latest campus notices...</p>
+            <p style="color:#94a3b8; font-size:12px; text-align:center;">Loading latest campus notices...</p>
         </div>
     </div>
 
     <!-- Section 3: Discussion Portion -->
     <div id="discussionTab" class="hidden">
-        <h3 style="font-size:15px; margin-bottom:10px;">Live Student Forum</h3>
+        <h3 style="font-size:14px; margin-bottom:8px;">Live Student Forum</h3>
         <div class="chat-box" id="chatBox">
             <div class="chat-msg">
                 <div class="author"><span>Admin / Teacher</span></div>
@@ -685,6 +804,7 @@ button:active {
 let studentName = "", studentRoll = "", studentSession = "2026-27";
 let teacherName = "";
 let currentTeacherSession = "2026-27";
+let activeTeacherSubTab = "roster";
 let allNotesData = [];
 let activeTab = "notes";
 
@@ -747,33 +867,45 @@ function hideAllAuthForms() {
     document.getElementById('signUpDiv').classList.add('hidden');
     document.getElementById('adminLoginDiv').classList.add('hidden');
     document.getElementById('adminSignUpDiv').classList.add('hidden');
+    document.getElementById('topAdminBar').classList.add('hidden');
+    document.getElementById('studentAuthSwitcher').classList.add('hidden');
 }
 
 function showStudentSignUp() {
     hideAllAuthForms();
+    document.getElementById('topAdminBar').classList.remove('hidden');
+    document.getElementById('studentAuthSwitcher').classList.remove('hidden');
     document.getElementById('signUpDiv').classList.remove('hidden');
+    document.getElementById('switchBtnSignUp').classList.add('active');
+    document.getElementById('switchBtnLogin').classList.remove('active');
 }
 
 function showStudentLogin() {
     hideAllAuthForms();
+    document.getElementById('topAdminBar').classList.remove('hidden');
+    document.getElementById('studentAuthSwitcher').classList.remove('hidden');
     document.getElementById('loginDiv').classList.remove('hidden');
+    document.getElementById('switchBtnLogin').classList.add('active');
+    document.getElementById('switchBtnSignUp').classList.remove('active');
 }
 
 function openAdminSignUp() {
     hideAllAuthForms();
+    document.getElementById('topAdminBar').classList.remove('hidden');
     document.getElementById('adminSignUpDiv').classList.remove('hidden');
 }
 
 function openAdminLogin() {
     hideAllAuthForms();
+    document.getElementById('topAdminBar').classList.remove('hidden');
     document.getElementById('adminLoginDiv').classList.remove('hidden');
 }
 
 function backToStudentLogin() {
-    showStudentSignUp();
+    showStudentLogin();
 }
 
-// --- STUDENT REGISTRATION WITH DIRECT PASSWORD STORAGE ---
+// --- STUDENT REGISTRATION ---
 async function signUpStudent() {
     let name = document.getElementById('signupName').value.trim();
     let roll = document.getElementById('signupRoll').value.trim();
@@ -800,7 +932,7 @@ async function signUpStudent() {
 
         if (!rosterSnap.exists()) {
             showToast("Access Denied: Roll No not found in official college roster.");
-            btn.innerText = "Create Account";
+            btn.innerText = "Create Student Account";
             btn.disabled = false;
             return;
         }
@@ -813,7 +945,7 @@ async function signUpStudent() {
 
         if (docSnap.exists()) {
             showToast("Account already exists for this Roll No! Please log in.");
-            btn.innerText = "Create Account";
+            btn.innerText = "Create Student Account";
             btn.disabled = false;
             return;
         }
@@ -826,14 +958,14 @@ async function signUpStudent() {
             createdAt: window.fs.serverTimestamp()
         });
 
-        btn.innerText = "Create Account";
+        btn.innerText = "Create Student Account";
         btn.disabled = false;
         showToast(`Account Created for Session ${assignedSession}! Please log in.`);
         document.getElementById('roll').value = roll;
         showStudentLogin();
     } catch (e) {
         console.error(e);
-        btn.innerText = "Create Account";
+        btn.innerText = "Create Student Account";
         btn.disabled = false;
         showToast("Connection error. Try again.");
     }
@@ -857,16 +989,10 @@ async function loginPortal() {
 
     try {
         const studentRef = window.fs.doc(window.db, "students", rollInput);
-        console.log("📡 Fetching document from Firestore path: students/" + rollInput);
-        
         const docSnap = await window.fs.getDoc(studentRef);
 
         if (docSnap.exists()) {
-            console.log("✅ Document found in Firebase:", docSnap.data());
             const data = docSnap.data();
-            
-            console.log("Comparing password. Input:", passInput, "| Stored:", data.pass);
-
             if (data.pass === passInput) {
                 studentName = data.name;
                 studentRoll = data.roll;
@@ -886,24 +1012,23 @@ async function loginPortal() {
                 
                 subscribeStudentRealtimeData();
             } else {
-                console.warn("⚠️ Password mismatch! The password in Firestore does not match what was entered.");
                 loginBtn.innerText = "Access Portal";
                 loginBtn.disabled = false;
                 showToast("Access Denied: Invalid Password");
             }
         } else {
-            console.warn("⚠️ Document does NOT exist in Firestore for roll ID:", rollInput);
             loginBtn.innerText = "Access Portal";
             loginBtn.disabled = false;
             showToast("Access Denied: Roll No not registered yet");
         }
     } catch (e) {
-        console.error("❌ CRITICAL FIREBASE ERROR during login:", e);
+        console.error(e);
         loginBtn.innerText = "Access Portal";
         loginBtn.disabled = false;
         showToast("Connection error. Check console.");
     }
 }
+
 function logoutPortal() {
     localStorage.removeItem('mach_student_name');
     localStorage.removeItem('mach_student_roll');
@@ -1011,6 +1136,28 @@ function switchTeacherSession(sess) {
     renderTeacherSessionPanel();
 }
 
+function switchTeacherSubTab(subTab) {
+    activeTeacherSubTab = subTab;
+    document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+    
+    if (subTab === 'roster') document.getElementById('subTabRoster').classList.add('active');
+    if (subTab === 'notes') document.getElementById('subTabNotes').classList.add('active');
+    if (subTab === 'notices') document.getElementById('subTabNotices').classList.add('active');
+    if (subTab === 'chats') document.getElementById('subTabChats').classList.add('active');
+
+    let sections = ['secRoster', 'secNotes', 'secNotices', 'secChats'];
+    sections.forEach(secId => {
+        let el = document.getElementById(`${secId}_${currentTeacherSession}`);
+        if (el) {
+            if (secId.toLowerCase().includes(subTab)) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+    });
+}
+
 function switchTab(tab) {
     activeTab = tab;
     document.getElementById('notesTab').classList.add('hidden');
@@ -1089,76 +1236,82 @@ function subscribeStudentRealtimeData() {
     });
 }
 
-// --- TEACHER MANAGEMENT PANEL & BULK ROSTER IMPORTER ---
+// --- TEACHER MANAGEMENT PANEL WITH SUB-TAB STRUCTURE ---
 function renderTeacherSessionPanel() {
     let panel = document.getElementById('teacherSessionPanel');
     panel.innerHTML = `
-        <div style="margin-bottom:12px; font-size:14px; color:#38bdf8; font-weight:700;">Managing Session: ${currentTeacherSession}</div>
+        <div style="margin-bottom:10px; font-size:13px; color:#38bdf8; font-weight:700;">Active Session: ${currentTeacherSession}</div>
 
-        <!-- Bulk Student Roster Importer -->
-        <div class="admin-card">
-            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">📥 Bulk Import Roster (${currentTeacherSession})</h4>
-            <p style="font-size:11px; color:#94a3b8; margin-bottom:8px;">Format: RollNo, Name (one student per line)<br>Example: <span style="color:#f8fafc;">101, Fatima</span></p>
-            <textarea id="bulkRosterInput_${currentTeacherSession}" rows="3" placeholder="101, Fatima&#10;102, Maryam&#10;103, Nazish"></textarea>
-            <button onclick="bulkImportRosterFor('${currentTeacherSession}')">Import Roster List</button>
-        </div>
-
-        <!-- Registered Student Accounts Viewer -->
-        <div class="admin-card">
-            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">👥 Registered Student Accounts (${currentTeacherSession})</h4>
-            <div id="registeredStudentsContainer_${currentTeacherSession}"><p style="color:#94a3b8; font-size:12px;">Loading registered students...</p></div>
-        </div>
-
-        <!-- Direct PDF Upload Section -->
-        <div class="admin-card">
-            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">📁 Upload PDF File to Session ${currentTeacherSession}</h4>
-            <input id="uploadNoteTitle_${currentTeacherSession}" placeholder="PDF Title (e.g., Physics Chapter 2.pdf)">
-            <input id="uploadNoteInfo_${currentTeacherSession}" placeholder="Details (e.g., Size: 2.1 MB)">
-            <input type="file" id="pdfFileInput_${currentTeacherSession}" accept="application/pdf" style="background:rgba(15,23,42,0.6); padding:10px;">
-            <button onclick="uploadPDFNoteFor('${currentTeacherSession}')">Upload & Publish PDF</button>
-        </div>
-
-        <!-- External Link Option -->
-        <div class="admin-card">
-            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">🔗 Add Note via Shareable Link (${currentTeacherSession})</h4>
-            <input id="newNoteTitle_${currentTeacherSession}" placeholder="PDF Title">
-            <input id="newNoteInfo_${currentTeacherSession}" placeholder="Details">
-            <input id="newNoteLink_${currentTeacherSession}" placeholder="Share Link">
-            <button onclick="submitNewNoteFor('${currentTeacherSession}')">Publish Link Note</button>
-        </div>
-
-        <!-- Notice Publishing Option -->
-        <div class="admin-card">
-            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">📢 Post Campus Notice (${currentTeacherSession})</h4>
-            <input id="newNoticeTitle_${currentTeacherSession}" placeholder="Notice Title">
-            <input id="newNoticeDate_${currentTeacherSession}" placeholder="Date (e.g., Oct 30, 2026)">
-            <textarea id="newNoticeContent_${currentTeacherSession}" rows="2" placeholder="Notice details..."></textarea>
-            <button onclick="submitNewNoticeFor('${currentTeacherSession}')">Publish Notice</button>
-        </div>
-
-        <!-- Manage Existing Notes & Notices -->
-        <div class="admin-card">
-            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">📚 Manage Notes (${currentTeacherSession})</h4>
-            <div id="manageNotesContainer_${currentTeacherSession}"><p style="color:#94a3b8; font-size:12px;">Loading notes...</p></div>
-        </div>
-
-        <div class="admin-card">
-            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">📢 Manage Notices (${currentTeacherSession})</h4>
-            <div id="manageNoticesContainer_${currentTeacherSession}"><p style="color:#94a3b8; font-size:12px;">Loading notices...</p></div>
-        </div>
-
-        <!-- Session Discussion Panel with Delete Message Feature -->
-        <div class="admin-card">
-            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">💬 Student Discussions & Message Moderation (${currentTeacherSession})</h4>
-            <div class="chat-box" id="teacherChatBox_${currentTeacherSession}">
-                <p style="color:#94a3b8; font-size:12px;">Loading discussions...</p>
+        <!-- Section 1: Roster & Accounts -->
+        <div id="secRoster_${currentTeacherSession}">
+            <div class="admin-card">
+                <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#38bdf8;">📥 Bulk Import Roster (${currentTeacherSession})</h4>
+                <p style="font-size:10.5px; color:#94a3b8; margin-bottom:6px;">Format: RollNo, Name (one student per line)<br>Example: <span style="color:#f8fafc;">101, Fatima</span></p>
+                <textarea id="bulkRosterInput_${currentTeacherSession}" rows="3" placeholder="101, Fatima&#10;102, Maryam&#10;103, Nazish"></textarea>
+                <button onclick="bulkImportRosterFor('${currentTeacherSession}')">Import Roster List</button>
             </div>
-            <textarea id="teacherReplyInput_${currentTeacherSession}" rows="2" placeholder="Type response to students..."></textarea>
-            <button onclick="postTeacherReply('${currentTeacherSession}')">Send Teacher Response</button>
+
+            <div class="admin-card">
+                <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#38bdf8;">👥 Registered Student Accounts (${currentTeacherSession})</h4>
+                <div id="registeredStudentsContainer_${currentTeacherSession}"><p style="color:#94a3b8; font-size:11.5px;">Loading registered students...</p></div>
+            </div>
+        </div>
+
+        <!-- Section 2: Notes Management -->
+        <div id="secNotes_${currentTeacherSession}" class="hidden">
+            <div class="admin-card">
+                <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#38bdf8;">📁 Direct PDF Upload (${currentTeacherSession})</h4>
+                <input id="uploadNoteTitle_${currentTeacherSession}" placeholder="PDF Title (e.g., Physics Chapter 2.pdf)">
+                <input id="uploadNoteInfo_${currentTeacherSession}" placeholder="Details (e.g., Size: 2.1 MB)">
+                <input type="file" id="pdfFileInput_${currentTeacherSession}" accept="application/pdf" style="background:rgba(15,23,42,0.6); padding:8px;">
+                <button onclick="uploadPDFNoteFor('${currentTeacherSession}')">Upload & Publish PDF</button>
+            </div>
+
+            <div class="admin-card">
+                <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#38bdf8;">🔗 Shareable Google Drive Link (${currentTeacherSession})</h4>
+                <input id="newNoteTitle_${currentTeacherSession}" placeholder="PDF Title">
+                <input id="newNoteInfo_${currentTeacherSession}" placeholder="Details">
+                <input id="newNoteLink_${currentTeacherSession}" placeholder="Paste Google Drive Link">
+                <button onclick="submitNewNoteFor('${currentTeacherSession}')">Publish Link Note</button>
+            </div>
+
+            <div class="admin-card">
+                <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#38bdf8;">📚 Manage Published Notes (${currentTeacherSession})</h4>
+                <div id="manageNotesContainer_${currentTeacherSession}"><p style="color:#94a3b8; font-size:11.5px;">Loading notes...</p></div>
+            </div>
+        </div>
+
+        <!-- Section 3: Notices Management -->
+        <div id="secNotices_${currentTeacherSession}" class="hidden">
+            <div class="admin-card">
+                <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#38bdf8;">📢 Post Campus Notice (${currentTeacherSession})</h4>
+                <input id="newNoticeTitle_${currentTeacherSession}" placeholder="Notice Title">
+                <input id="newNoticeDate_${currentTeacherSession}" placeholder="Date (e.g., Oct 30, 2026)">
+                <textarea id="newNoticeContent_${currentTeacherSession}" rows="2" placeholder="Notice details..."></textarea>
+                <button onclick="submitNewNoticeFor('${currentTeacherSession}')">Publish Notice</button>
+            </div>
+
+            <div class="admin-card">
+                <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#38bdf8;">📢 Manage Notices (${currentTeacherSession})</h4>
+                <div id="manageNoticesContainer_${currentTeacherSession}"><p style="color:#94a3b8; font-size:11.5px;">Loading notices...</p></div>
+            </div>
+        </div>
+
+        <!-- Section 4: Moderation & Discussions -->
+        <div id="secChats_${currentTeacherSession}" class="hidden">
+            <div class="admin-card">
+                <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#38bdf8;">💬 Student Discussions & Moderation (${currentTeacherSession})</h4>
+                <div class="chat-box" id="teacherChatBox_${currentTeacherSession}">
+                    <p style="color:#94a3b8; font-size:11.5px;">Loading discussions...</p>
+                </div>
+                <textarea id="teacherReplyInput_${currentTeacherSession}" rows="2" placeholder="Type response to students..."></textarea>
+                <button onclick="postTeacherReply('${currentTeacherSession}')">Send Teacher Response</button>
+            </div>
         </div>
     `;
 
     subscribeTeacherRealtimeData(currentTeacherSession);
+    switchTeacherSubTab(activeTeacherSubTab);
 }
 
 function subscribeTeacherRealtimeData(sess) {
@@ -1172,15 +1325,15 @@ function subscribeTeacherRealtimeData(sess) {
             snapshot.forEach((docSnap) => {
                 let st = docSnap.data();
                 let div = document.createElement('div');
-                div.style.cssText = "background:rgba(30,41,59,0.7); padding:8px 12px; border-radius:8px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; font-size:12px;";
+                div.style.cssText = "background:rgba(30,41,59,0.7); padding:8px 10px; border-radius:8px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center; font-size:11.5px;";
                 div.innerHTML = `
                     <div><strong style="color:#38bdf8;">Roll No: ${st.roll}</strong> - ${st.name}</div>
-                    <span style="color:#10b981; font-weight:600;">Account Active 🟢</span>
+                    <span style="color:#10b981; font-weight:600;">Active 🟢</span>
                 `;
                 container.appendChild(div);
             });
         } else {
-            container.innerHTML = "<p style='color:#94a3b8; font-size:12px;'>No student accounts registered for this session yet.</p>";
+            container.innerHTML = "<p style='color:#94a3b8; font-size:11.5px;'>No student accounts registered for this session yet.</p>";
         }
     });
 
@@ -1195,13 +1348,13 @@ function subscribeTeacherRealtimeData(sess) {
                 let note = docSnap.data();
                 let id = docSnap.id;
                 let div = document.createElement('div');
-                div.style.cssText = "background:rgba(30,41,59,0.7); padding:10px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
+                div.style.cssText = "background:rgba(30,41,59,0.7); padding:8px 10px; border-radius:8px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;";
                 div.innerHTML = `
-                    <div>
-                        <strong style="font-size:13px; color:#f8fafc;">${note.title}</strong><br>
-                        <span style="font-size:11px; color:#94a3b8;">${note.info || ''}</span>
+                    <div style="flex:1; margin-right:8px;">
+                        <strong style="font-size:12px; color:#f8fafc;">${note.title}</strong><br>
+                        <span style="font-size:10px; color:#94a3b8;">${note.info || ''}</span>
                     </div>
-                    <div style="display:flex; gap:6px;">
+                    <div style="display:flex; gap:4px;">
                         <button class="btn-small btn-view" onclick="window.open('${note.link}', '_blank')">View</button>
                         <button class="btn-small btn-edit" onclick="editNotePrompt('${id}', '${encodeURIComponent(note.title)}', '${encodeURIComponent(note.info || '')}', '${encodeURIComponent(note.link)}')">Edit</button>
                         <button class="btn-small btn-delete" onclick="deleteNoteItem('${id}')">Delete</button>
@@ -1210,7 +1363,7 @@ function subscribeTeacherRealtimeData(sess) {
                 container.appendChild(div);
             });
         } else {
-            container.innerHTML = "<p style='color:#94a3b8; font-size:12px;'>No notes published for this session yet.</p>";
+            container.innerHTML = "<p style='color:#94a3b8; font-size:11.5px;'>No notes published for this session yet.</p>";
         }
     });
 
@@ -1225,13 +1378,13 @@ function subscribeTeacherRealtimeData(sess) {
                 let notice = docSnap.data();
                 let id = docSnap.id;
                 let div = document.createElement('div');
-                div.style.cssText = "background:rgba(30,41,59,0.7); padding:10px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
+                div.style.cssText = "background:rgba(30,41,59,0.7); padding:8px 10px; border-radius:8px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;";
                 div.innerHTML = `
-                    <div>
-                        <strong style="font-size:13px; color:#fbbf24;">${notice.title}</strong><br>
-                        <span style="font-size:11px; color:#94a3b8;">${notice.content}</span>
+                    <div style="flex:1; margin-right:8px;">
+                        <strong style="font-size:12px; color:#fbbf24;">${notice.title}</strong><br>
+                        <span style="font-size:10px; color:#94a3b8;">${notice.content}</span>
                     </div>
-                    <div style="display:flex; gap:6px;">
+                    <div style="display:flex; gap:4px;">
                         <button class="btn-small btn-edit" onclick="editNoticePrompt('${id}', '${encodeURIComponent(notice.title)}', '${encodeURIComponent(notice.date || '')}', '${encodeURIComponent(notice.content)}')">Edit</button>
                         <button class="btn-small btn-delete" onclick="deleteNoticeItem('${id}')">Delete</button>
                     </div>
@@ -1239,11 +1392,11 @@ function subscribeTeacherRealtimeData(sess) {
                 container.appendChild(div);
             });
         } else {
-            container.innerHTML = "<p style='color:#94a3b8; font-size:12px;'>No notices posted for this session yet.</p>";
+            container.innerHTML = "<p style='color:#94a3b8; font-size:11.5px;'>No notices posted for this session yet.</p>";
         }
     });
 
-    // 4. Discussion & Teacher Chat Stream with Delete Message Button
+    // 4. Discussion & Moderation Stream
     if(unsubscribeTeacherChats) unsubscribeTeacherChats();
     const chatQ = window.fs.query(
         window.fs.collection(window.db, "chats"), 
@@ -1260,24 +1413,24 @@ function subscribeTeacherRealtimeData(sess) {
                 let chatId = docSnap.id;
                 let div = document.createElement('div');
                 div.className = 'chat-msg';
-                div.style.cssText = "display:flex; justify-content:space-between; align-items:flex-start; gap:10px;";
+                div.style.cssText = "display:flex; justify-content:space-between; align-items:flex-start; gap:8px;";
                 div.innerHTML = `
                     <div style="flex:1;">
                         <div class="author"><span>${item.name} (${item.roll})</span></div>
                         <div class="text">${item.message}</div>
                     </div>
-                    <button class="btn-small btn-delete" style="width:auto; padding:4px 8px; font-size:10px; margin-top:0;" onclick="deleteChatMessage('${chatId}')">Delete</button>
+                    <button class="btn-small btn-delete" style="width:auto; padding:3px 6px; font-size:9.5px; margin-top:0;" onclick="deleteChatMessage('${chatId}')">Delete</button>
                 `;
                 chatBox.appendChild(div);
             });
             chatBox.scrollTop = chatBox.scrollHeight;
         } else {
-            chatBox.innerHTML = "<p style='color:#94a3b8; font-size:12px; text-align:center;'>No messages in this session forum yet.</p>";
+            chatBox.innerHTML = "<p style='color:#94a3b8; font-size:11.5px; text-align:center;'>No messages in this session forum yet.</p>";
         }
     });
 }
 
-// --- BULK ROSTER IMPORTER FUNCTION ---
+// --- BULK ROSTER IMPORTER ---
 async function bulkImportRosterFor(sess) {
     let inputVal = document.getElementById(`bulkRosterInput_${sess}`).value.trim();
     if (!inputVal) {
@@ -1303,17 +1456,17 @@ async function bulkImportRosterFor(sess) {
             }
         }
     }
-    showToast(`Successfully imported ${count} students to Session ${sess}!`);
+    showToast(`Imported ${count} students to Session ${sess}!`);
     document.getElementById(`bulkRosterInput_${sess}`).value = "";
 }
 
-// --- DELETE CHAT MESSAGE FUNCTION ---
+// --- DELETE CHAT MESSAGE ---
 async function deleteChatMessage(chatId) {
     if(!confirm("Are you sure you want to delete this student message?")) return;
     try {
         const chatRef = window.fs.doc(window.db, "chats", chatId);
         await window.fs.deleteDoc(chatRef);
-        showToast("Message deleted successfully!");
+        showToast("Message deleted!");
     } catch (e) {
         console.error(e);
         showToast("Error deleting message.");
@@ -1412,7 +1565,7 @@ async function editNotePrompt(id, encTitle, encInfo, encLink) {
 
     const docRef = window.fs.doc(window.db, "notes", id);
     await window.fs.updateDoc(docRef, { title: newTitle, info: newInfo, link: newLink });
-    showToast("Note Updated Successfully!");
+    showToast("Note Updated!");
 }
 
 async function deleteNoteItem(id) {
@@ -1434,7 +1587,7 @@ async function editNoticePrompt(id, encTitle, encDate, encContent) {
 
     const docRef = window.fs.doc(window.db, "notices", id);
     await window.fs.updateDoc(docRef, { title: newTitle, date: newDate, content: newContent });
-    showToast("Notice Updated Successfully!");
+    showToast("Notice Updated!");
 }
 
 async function deleteNoticeItem(id) {
@@ -1464,7 +1617,7 @@ function renderNotes(notes) {
             container.appendChild(card);
         });
     } else {
-        container.innerHTML = `<p style='color:#94a3b8; font-size:12px; text-align:center;'>No matching notes found for Session ${studentSession}.</p>`;
+        container.innerHTML = `<p style='color:#94a3b8; font-size:11.5px; text-align:center;'>No matching notes found for Session ${studentSession}.</p>`;
     }
 }
 
