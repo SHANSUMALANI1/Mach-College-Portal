@@ -853,42 +853,57 @@ async function loginPortal() {
     loginBtn.innerText = "Verifying Credentials...";
     loginBtn.disabled = true;
 
+    console.log("🔍 Attempting login for Roll No:", rollInput);
+
     try {
         const studentRef = window.fs.doc(window.db, "students", rollInput);
+        console.log("📡 Fetching document from Firestore path: students/" + rollInput);
+        
         const docSnap = await window.fs.getDoc(studentRef);
 
-        if (docSnap.exists() && docSnap.data().pass === passInput) {
+        if (docSnap.exists()) {
+            console.log("✅ Document found in Firebase:", docSnap.data());
             const data = docSnap.data();
-            studentName = data.name;
-            studentRoll = data.roll;
-            studentSession = data.session || "2026-27";
-
-            localStorage.setItem('mach_student_name', studentName);
-            localStorage.setItem('mach_student_roll', studentRoll);
-            localStorage.setItem('mach_student_session', studentSession);
-
-            document.getElementById('userWelcome').innerText = `👤 ${studentName} (${studentRoll}) - Session ${studentSession}`;
-            hideAllAuthForms();
-            document.getElementById('portalDiv').classList.remove('hidden');
-
-            loginBtn.innerText = "Access Portal";
-            loginBtn.disabled = false;
-            showToast(`Welcome! Session ${studentSession} detected.`);
             
-            subscribeStudentRealtimeData();
+            console.log("Comparing password. Input:", passInput, "| Stored:", data.pass);
+
+            if (data.pass === passInput) {
+                studentName = data.name;
+                studentRoll = data.roll;
+                studentSession = data.session || "2026-27";
+
+                localStorage.setItem('mach_student_name', studentName);
+                localStorage.setItem('mach_student_roll', studentRoll);
+                localStorage.setItem('mach_student_session', studentSession);
+
+                document.getElementById('userWelcome').innerText = `👤 ${studentName} (${studentRoll}) - Session ${studentSession}`;
+                hideAllAuthForms();
+                document.getElementById('portalDiv').classList.remove('hidden');
+
+                loginBtn.innerText = "Access Portal";
+                loginBtn.disabled = false;
+                showToast(`Welcome! Session ${studentSession} detected.`);
+                
+                subscribeStudentRealtimeData();
+            } else {
+                console.warn("⚠️ Password mismatch! The password in Firestore does not match what was entered.");
+                loginBtn.innerText = "Access Portal";
+                loginBtn.disabled = false;
+                showToast("Access Denied: Invalid Password");
+            }
         } else {
+            console.warn("⚠️ Document does NOT exist in Firestore for roll ID:", rollInput);
             loginBtn.innerText = "Access Portal";
             loginBtn.disabled = false;
-            showToast("Access Denied: Invalid Roll No or Password");
+            showToast("Access Denied: Roll No not registered yet");
         }
     } catch (e) {
-        console.error(e);
+        console.error("❌ CRITICAL FIREBASE ERROR during login:", e);
         loginBtn.innerText = "Access Portal";
         loginBtn.disabled = false;
-        showToast("Connection error. Try again.");
+        showToast("Connection error. Check console.");
     }
 }
-
 function logoutPortal() {
     localStorage.removeItem('mach_student_name');
     localStorage.removeItem('mach_student_roll');
