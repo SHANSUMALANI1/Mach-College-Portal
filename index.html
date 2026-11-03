@@ -472,7 +472,15 @@ button:active {
 <!-- Student Sign Up Screen (PRIMARY FIRST SCREEN) -->
 <div id="signUpDiv">
     <h3 style="font-size:16px; margin-bottom:8px;">Student Account Registration</h3>
-    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your official roster Name and Roll No to create your account password.</p>
+    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Select your Session and enter your roster Name and Roll No to create a password.</p>
+    
+    <label style="font-size:12px; color:#38bdf8; font-weight:600;">Select Academic Session:</label>
+    <select id="signupSession">
+        <option value="2026-27">Session 2026-27</option>
+        <option value="2025-26">Session 2025-26</option>
+        <option value="2024-25">Session 2024-25</option>
+    </select>
+    
     <input id="signupName" placeholder="Full Student Name (from Sheet)">
     <input id="signupRoll" placeholder="Official Roll No (e.g., 101)">
     <input type="password" id="signupPass" placeholder="Create Password">
@@ -490,7 +498,15 @@ button:active {
 <!-- Student Login Screen -->
 <div id="loginDiv" class="hidden">
     <h3 style="font-size:16px; margin-bottom:8px;">Student Login</h3>
-    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your Roll No and Password to log in.</p>
+    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Select your Session, Roll No and Password to log in.</p>
+    
+    <label style="font-size:12px; color:#38bdf8; font-weight:600;">Academic Session:</label>
+    <select id="loginSession">
+        <option value="2026-27">Session 2026-27</option>
+        <option value="2025-26">Session 2025-26</option>
+        <option value="2024-25">Session 2024-25</option>
+    </select>
+
     <input id="roll" placeholder="Official Roll No (e.g., 101)">
     <input type="password" id="loginPass" placeholder="Password">
     <button id="loginBtn" onclick="loginPortal()">Access Portal</button>
@@ -543,6 +559,12 @@ button:active {
     <!-- Direct PDF File Upload Section -->
     <div class="admin-card">
         <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">📁 Upload PDF File Directly</h4>
+        <label style="font-size:11px; color:#94a3b8;">Target Session / Class:</label>
+        <select id="uploadTargetSession">
+            <option value="2026-27">Session 2026-27</option>
+            <option value="2025-26">Session 2025-26</option>
+            <option value="2024-25">Session 2024-25</option>
+        </select>
         <input id="uploadNoteTitle" placeholder="PDF Title (e.g., Physics Chapter 2.pdf)">
         <input id="uploadNoteInfo" placeholder="Details (e.g., Size: 2.1 MB | Added: Oct 2026)">
         <input type="file" id="pdfFileInput" accept="application/pdf" style="background:rgba(15,23,42,0.6); padding:10px;">
@@ -552,6 +574,12 @@ button:active {
     <!-- External Link Option -->
     <div class="admin-card">
         <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">🔗 Add Note via Shareable Link</h4>
+        <label style="font-size:11px; color:#94a3b8;">Target Session / Class:</label>
+        <select id="linkTargetSession">
+            <option value="2026-27">Session 2026-27</option>
+            <option value="2025-26">Session 2025-26</option>
+            <option value="2024-25">Session 2024-25</option>
+        </select>
         <input id="newNoteTitle" placeholder="PDF Title (e.g., Chemistry Notes)">
         <input id="newNoteInfo" placeholder="Details (e.g., Unit 1)">
         <input id="newNoteLink" placeholder="Google Drive or PDF Share Link">
@@ -561,6 +589,12 @@ button:active {
     <!-- Notice Publishing Option -->
     <div class="admin-card">
         <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">📢 Post Campus Notice</h4>
+        <label style="font-size:11px; color:#94a3b8;">Target Session / Class:</label>
+        <select id="noticeTargetSession">
+            <option value="2026-27">Session 2026-27</option>
+            <option value="2025-26">Session 2025-26</option>
+            <option value="2024-25">Session 2024-25</option>
+        </select>
         <input id="newNoticeTitle" placeholder="Notice Title (e.g., Mid-Term Exam Schedule)">
         <input id="newNoticeDate" placeholder="Date (e.g., Oct 30, 2026)">
         <textarea id="newNoticeContent" rows="2" placeholder="Notice details..."></textarea>
@@ -623,8 +657,8 @@ button:active {
 <div id="toast" class="toast">Action notification</div>
 
 <script>
-let sheetURL = "https://script.google.com/macros/s/AKfycbxgx2LDJoj8SA_1o6HgX4nCx5AYc0PvBB9phz5U8Zh1i1-k6TPpXQAatE_Jatfte3TeLg/exec";
-let studentName = "", studentRoll = "";
+let sheetURL = "https://script.google.com/macros/s/AKfycbz_K0-ystkDzkGYyCs8xx7Ieckji_lauVbsHybB8yQOuRq5FXfU9xexEUeEhtiBLNFJHw/exec";
+let studentName = "", studentRoll = "", studentSession = "2026-27";
 let teacherName = "";
 let allNotesData = [];
 
@@ -652,12 +686,14 @@ window.onload = function() {
 
     let savedName = localStorage.getItem('mach_student_name');
     let savedRoll = localStorage.getItem('mach_student_roll');
+    let savedSession = localStorage.getItem('mach_student_session');
 
-    if (savedName && savedRoll) {
+    if (savedName && savedRoll && savedSession) {
         studentName = savedName;
         studentRoll = savedRoll;
+        studentSession = savedSession;
         
-        document.getElementById('userWelcome').innerText = `👤 ${studentName} (${studentRoll})`;
+        document.getElementById('userWelcome').innerText = `👤 ${studentName} (${studentRoll}) - Session ${studentSession}`;
         hideAllAuthForms();
         document.getElementById('portalDiv').classList.remove('hidden');
         
@@ -701,6 +737,7 @@ function backToStudentLogin() {
 }
 
 function sendDataToSheet(params) {
+    if(!params.session) params.session = studentSession;
     fetch(sheetURL, {
         method: "POST",
         mode: "no-cors",
@@ -712,6 +749,7 @@ function sendDataToSheet(params) {
 }
 
 function signUpStudent() {
+    let session = document.getElementById('signupSession').value;
     let name = document.getElementById('signupName').value.trim();
     let roll = document.getElementById('signupRoll').value.trim();
     let pass = document.getElementById('signupPass').value.trim();
@@ -731,14 +769,15 @@ function signUpStudent() {
     btn.innerText = "Creating Account...";
     btn.disabled = true;
 
-    fetch(`${sheetURL}?action=studentSignUp&roll=${encodeURIComponent(roll)}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}`)
+    fetch(`${sheetURL}?action=studentSignUp&session=${encodeURIComponent(session)}&roll=${encodeURIComponent(roll)}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}`)
     .then(res => res.json())
     .then(data => {
         btn.innerText = "Create Account";
         btn.disabled = false;
 
         if (data.status === "success") {
-            showToast("Account Created Successfully! Please log in.");
+            showToast(`Account Created for Session ${session}! Please log in.`);
+            document.getElementById('loginSession').value = session;
             document.getElementById('roll').value = roll;
             showStudentLogin();
         } else {
@@ -753,6 +792,7 @@ function signUpStudent() {
 }
 
 function loginPortal() {
+    let session = document.getElementById('loginSession').value;
     let rollInput = document.getElementById('roll').value.trim();
     let passInput = document.getElementById('loginPass').value.trim();
     
@@ -765,7 +805,7 @@ function loginPortal() {
     loginBtn.innerText = "Verifying Credentials...";
     loginBtn.disabled = true;
 
-    fetch(`${sheetURL}?action=verifyLogin&roll=${encodeURIComponent(rollInput)}&pass=${encodeURIComponent(passInput)}`)
+    fetch(`${sheetURL}?action=verifyLogin&session=${encodeURIComponent(session)}&roll=${encodeURIComponent(rollInput)}&pass=${encodeURIComponent(passInput)}`)
     .then(res => res.json())
     .then(data => {
         loginBtn.innerText = "Access Portal";
@@ -774,18 +814,21 @@ function loginPortal() {
         if (data.status === "success") {
             studentName = data.verifiedName || "Student";
             studentRoll = rollInput;
+            studentSession = session;
 
             localStorage.setItem('mach_student_name', studentName);
             localStorage.setItem('mach_student_roll', studentRoll);
+            localStorage.setItem('mach_student_session', studentSession);
 
-            document.getElementById('userWelcome').innerText = `👤 ${studentName} (${studentRoll})`;
+            document.getElementById('userWelcome').innerText = `👤 ${studentName} (${studentRoll}) - Session ${studentSession}`;
             hideAllAuthForms();
             document.getElementById('portalDiv').classList.remove('hidden');
 
             sendDataToSheet({
                 action: "login",
                 name: studentName,
-                roll: studentRoll
+                roll: studentRoll,
+                session: studentSession
             });
             
             showToast("Welcome to the Portal!");
@@ -794,7 +837,7 @@ function loginPortal() {
             loadPreviousChats();
             setInterval(loadPreviousChats, 5000);
         } else {
-            showToast("Access Denied: Invalid Roll No or Password.");
+            showToast("Access Denied: Invalid Roll No or Password for " + session);
         }
     })
     .catch(e => {
@@ -808,6 +851,7 @@ function loginPortal() {
 function logoutPortal() {
     localStorage.removeItem('mach_student_name');
     localStorage.removeItem('mach_student_roll');
+    localStorage.removeItem('mach_student_session');
     location.reload();
 }
 
@@ -894,6 +938,7 @@ function logoutAdmin() {
 }
 
 function uploadPDFNote() {
+    let targetSession = document.getElementById('uploadTargetSession').value;
     let title = document.getElementById('uploadNoteTitle').value.trim();
     let info = document.getElementById('uploadNoteInfo').value.trim();
     let fileInput = document.getElementById('pdfFileInput');
@@ -916,6 +961,7 @@ function uploadPDFNote() {
             method: "POST",
             body: JSON.stringify({
                 action: "uploadPDF",
+                session: targetSession,
                 title: title,
                 info: info || `Size: ${(file.size / (1024*1024)).toFixed(1)} MB | Added by ${teacherName}`,
                 fileName: file.name,
@@ -926,7 +972,7 @@ function uploadPDFNote() {
         .then(() => {
             uploadBtn.innerText = "Upload & Publish PDF";
             uploadBtn.disabled = false;
-            showToast("PDF Uploaded & Published!");
+            showToast(`PDF Published to Session ${targetSession}!`);
             document.getElementById('uploadNoteTitle').value = "";
             document.getElementById('uploadNoteInfo').value = "";
             fileInput.value = "";
@@ -942,6 +988,7 @@ function uploadPDFNote() {
 }
 
 function submitNewNote() {
+    let targetSession = document.getElementById('linkTargetSession').value;
     let title = document.getElementById('newNoteTitle').value.trim();
     let info = document.getElementById('newNoteInfo').value.trim();
     let link = document.getElementById('newNoteLink').value.trim();
@@ -953,18 +1000,20 @@ function submitNewNote() {
 
     sendDataToSheet({
         action: "addNote",
+        session: targetSession,
         title: title,
         info: info || `Added by ${teacherName}`,
         link: link
     });
 
-    showToast("Note Published Successfully!");
+    showToast(`Note Published to Session ${targetSession}!`);
     document.getElementById('newNoteTitle').value = "";
     document.getElementById('newNoteInfo').value = "";
     document.getElementById('newNoteLink').value = "";
 }
 
 function submitNewNotice() {
+    let targetSession = document.getElementById('noticeTargetSession').value;
     let title = document.getElementById('newNoticeTitle').value.trim();
     let date = document.getElementById('newNoticeDate').value.trim();
     let content = document.getElementById('newNoticeContent').value.trim();
@@ -976,12 +1025,13 @@ function submitNewNotice() {
 
     sendDataToSheet({
         action: "addNotice",
+        session: targetSession,
         title: title,
         date: date || "Recent",
         content: content
     });
 
-    showToast("Notice Published Successfully!");
+    showToast(`Notice Published to Session ${targetSession}!`);
     document.getElementById('newNoticeTitle').value = "";
     document.getElementById('newNoticeDate').value = "";
     document.getElementById('newNoticeContent').value = "";
@@ -1008,7 +1058,7 @@ function switchTab(tab) {
 }
 
 function loadNotesFromSheet() {
-    fetch(`${sheetURL}?action=getNotes`)
+    fetch(`${sheetURL}?action=getNotes&session=${encodeURIComponent(studentSession)}`)
     .then(res => res.json())
     .then(data => {
         allNotesData = Array.isArray(data) ? data : [];
@@ -1041,7 +1091,7 @@ function renderNotes(notes) {
             container.appendChild(card);
         });
     } else {
-        container.innerHTML = "<p style='color:#94a3b8; font-size:12px; text-align:center;'>No matching notes found.</p>";
+        container.innerHTML = "<p style='color:#94a3b8; font-size:12px; text-align:center;'>No matching notes found for your session.</p>";
     }
 }
 
@@ -1054,7 +1104,7 @@ function filterNotes() {
 }
 
 function loadAnnouncementsFromSheet() {
-    fetch(`${sheetURL}?action=getAnnouncements`)
+    fetch(`${sheetURL}?action=getAnnouncements&session=${encodeURIComponent(studentSession)}`)
     .then(res => res.json())
     .then(data => {
         let container = document.getElementById('noticesContainer');
@@ -1075,8 +1125,8 @@ function loadAnnouncementsFromSheet() {
             container.innerHTML = `
                 <div class="notice-card">
                     <span class="notice-date">📌 Official Notice</span>
-                    <h4>Welcome to Govt Boys Degree College Mach Portal</h4>
-                    <p>Check back regularly for updates regarding class schedules, examination details, and new study materials.</p>
+                    <h4>Welcome to Govt Boys Degree College Mach Portal (${studentSession})</h4>
+                    <p>Check back regularly for updates regarding class schedules, examination details, and new study materials for Session ${studentSession}.</p>
                 </div>
             `;
         }
@@ -1085,14 +1135,14 @@ function loadAnnouncementsFromSheet() {
 }
 
 function loadPreviousChats() {
-    fetch(`${sheetURL}?action=getChats`)
+    fetch(`${sheetURL}?action=getChats&session=${encodeURIComponent(studentSession)}`)
     .then(res => res.json())
     .then(data => {
         let chatBox = document.getElementById('chatBox');
         chatBox.innerHTML = `
             <div class="chat-msg">
                 <div class="author"><span>Admin / Teacher</span></div>
-                <div class="text">Welcome to the discussion forum! Feel free to ask any question regarding your notes.</div>
+                <div class="text">Welcome to the Session ${studentSession} discussion forum! Feel free to ask any question regarding your notes.</div>
             </div>
         `;
         if (Array.isArray(data)) {
@@ -1114,6 +1164,7 @@ function trackDownload(pdfName) {
         action: "download",
         name: studentName,
         roll: studentRoll,
+        session: studentSession,
         pdfName: pdfName
     });
 }
@@ -1124,6 +1175,7 @@ function trackView(pdfName) {
         action: "view",
         name: studentName,
         roll: studentRoll,
+        session: studentSession,
         pdfName: pdfName
     });
 }
@@ -1144,6 +1196,7 @@ function postMessage() {
         action: "chat",
         name: studentName,
         roll: studentRoll,
+        session: studentSession,
         message: msg
     });
 
