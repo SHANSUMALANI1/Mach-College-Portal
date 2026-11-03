@@ -603,6 +603,26 @@ button:active {
     position: relative;
 }
 
+.gender-badge-male {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.gender-badge-female {
+    background: rgba(236, 72, 153, 0.15);
+    color: #f472b6;
+    border: 1px solid rgba(236, 72, 153, 0.3);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
 .toast {
     position: fixed;
     bottom: 20px;
@@ -638,7 +658,7 @@ button:active {
 
 <div class="container">
 
-<!-- Global Top Bar for Admin Login Quick Access (Visible on Authentication Forms) -->
+<!-- Global Top Bar for Admin Login Quick Access -->
 <div id="topAdminBar" class="top-admin-bar">
     <span class="top-admin-title">Faculty Access</span>
     <div class="top-admin-actions">
@@ -660,7 +680,7 @@ button:active {
     </div>
 </div>
 
-<!-- Student Auth Mode Switcher (Visible when student login/signup is active) -->
+<!-- Student Auth Mode Switcher -->
 <div id="studentAuthSwitcher" class="segmented-control">
     <button id="switchBtnLogin" class="segmented-btn active" onclick="showStudentLogin()">👤 Student Login</button>
     <button id="switchBtnSignUp" class="segmented-btn" onclick="showStudentSignUp()">📝 Student Register</button>
@@ -781,7 +801,10 @@ button:active {
 
     <!-- Section 3: Discussion Portion -->
     <div id="discussionTab" class="hidden">
-        <h3 style="font-size:14px; margin-bottom:8px;">Live Student Forum</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <h3 style="font-size:14px; margin:0;">Live Student Forum</h3>
+            <span id="userGenderBadge" class="gender-badge-male">👦 Boys Forum</span>
+        </div>
         <div class="chat-box" id="chatBox">
             <div class="chat-msg">
                 <div class="author"><span>Admin / Teacher</span></div>
@@ -801,10 +824,11 @@ button:active {
 <div id="toast" class="toast">Action notification</div>
 
 <script>
-let studentName = "", studentRoll = "", studentSession = "2026-27";
+let studentName = "", studentRoll = "", studentSession = "2026-27", studentGender = "male";
 let teacherName = "";
 let currentTeacherSession = "2026-27";
 let activeTeacherSubTab = "roster";
+let currentTeacherGenderChannel = "male"; // "male" or "female"
 let allNotesData = [];
 let activeTab = "notes";
 
@@ -848,13 +872,23 @@ function initAppSession() {
     let savedName = localStorage.getItem('mach_student_name');
     let savedRoll = localStorage.getItem('mach_student_roll');
     let savedSession = localStorage.getItem('mach_student_session');
+    let savedGender = localStorage.getItem('mach_student_gender') || 'male';
 
     if (savedName && savedRoll && savedSession) {
         studentName = savedName;
         studentRoll = savedRoll;
         studentSession = savedSession;
+        studentGender = savedGender;
         
-        document.getElementById('userWelcome').innerText = `👤 ${studentName} (${studentRoll}) - Session ${studentSession}`;
+        let genderIcon = studentGender === 'female' ? '👧' : '👦';
+        document.getElementById('userWelcome').innerText = `${genderIcon} ${studentName} (${studentRoll}) - Session ${studentSession}`;
+        
+        let badge = document.getElementById('userGenderBadge');
+        if (badge) {
+            badge.className = studentGender === 'female' ? 'gender-badge-female' : 'gender-badge-male';
+            badge.innerText = studentGender === 'female' ? '👧 Girls Forum' : '👦 Boys Forum';
+        }
+
         hideAllAuthForms();
         document.getElementById('portalDiv').classList.remove('hidden');
         
@@ -939,6 +973,7 @@ async function signUpStudent() {
 
         const rosterData = rosterSnap.data();
         const assignedSession = rosterData.session || "2026-27";
+        const assignedGender = (rosterData.gender || "male").toLowerCase();
 
         const studentRef = window.fs.doc(window.db, "students", roll);
         const docSnap = await window.fs.getDoc(studentRef);
@@ -954,13 +989,14 @@ async function signUpStudent() {
             name: name,
             roll: roll,
             session: assignedSession,
+            gender: assignedGender,
             pass: pass,
             createdAt: window.fs.serverTimestamp()
         });
 
         btn.innerText = "Create Student Account";
         btn.disabled = false;
-        showToast(`Account Created for Session ${assignedSession}! Please log in.`);
+        showToast(`Account Created for Session ${assignedSession} (${assignedGender.toUpperCase()})! Please log in.`);
         document.getElementById('roll').value = roll;
         showStudentLogin();
     } catch (e) {
@@ -997,12 +1033,22 @@ async function loginPortal() {
                 studentName = data.name;
                 studentRoll = data.roll;
                 studentSession = data.session || "2026-27";
+                studentGender = data.gender || "male";
 
                 localStorage.setItem('mach_student_name', studentName);
                 localStorage.setItem('mach_student_roll', studentRoll);
                 localStorage.setItem('mach_student_session', studentSession);
+                localStorage.setItem('mach_student_gender', studentGender);
 
-                document.getElementById('userWelcome').innerText = `👤 ${studentName} (${studentRoll}) - Session ${studentSession}`;
+                let genderIcon = studentGender === 'female' ? '👧' : '👦';
+                document.getElementById('userWelcome').innerText = `${genderIcon} ${studentName} (${studentRoll}) - Session ${studentSession}`;
+                
+                let badge = document.getElementById('userGenderBadge');
+                if (badge) {
+                    badge.className = studentGender === 'female' ? 'gender-badge-female' : 'gender-badge-male';
+                    badge.innerText = studentGender === 'female' ? '👧 Girls Forum' : '👦 Boys Forum';
+                }
+
                 hideAllAuthForms();
                 document.getElementById('portalDiv').classList.remove('hidden');
 
@@ -1033,6 +1079,7 @@ function logoutPortal() {
     localStorage.removeItem('mach_student_name');
     localStorage.removeItem('mach_student_roll');
     localStorage.removeItem('mach_student_session');
+    localStorage.removeItem('mach_student_gender');
     location.reload();
 }
 
@@ -1185,6 +1232,10 @@ function switchTab(tab) {
 
 // --- REALTIME DATA LISTENERS (STUDENT) ---
 function subscribeStudentRealtimeData() {
+    if(unsubscribeNotes) unsubscribeNotes();
+    if(unsubscribeNotices) unsubscribeNotices();
+    if(unsubscribeChats) unsubscribeChats();
+
     const notesQuery = window.fs.query(
         window.fs.collection(window.db, "notes"), 
         window.fs.where("session", "==", studentSession)
@@ -1217,14 +1268,17 @@ function subscribeStudentRealtimeData() {
         }
     });
 
+    // Isolated Gender Channel Query
+    const channelTag = `${studentSession}_${studentGender}`;
     const chatQuery = window.fs.query(
         window.fs.collection(window.db, "chats"), 
-        window.fs.where("session", "==", studentSession),
+        window.fs.where("genderChannel", "==", channelTag),
         window.fs.orderBy("timestamp", "asc")
     );
     unsubscribeChats = window.fs.onSnapshot(chatQuery, (snapshot) => {
         let chatBox = document.getElementById('chatBox');
-        chatBox.innerHTML = `<div class="chat-msg"><div class="author"><span>Admin / Teacher</span></div><div class="text">Welcome to the Session ${studentSession} discussion forum!</div></div>`;
+        let titleTag = studentGender === 'female' ? 'Girls' : 'Boys';
+        chatBox.innerHTML = `<div class="chat-msg"><div class="author"><span>Admin / Teacher</span></div><div class="text">Welcome to the Session ${studentSession} ${titleTag} Forum!</div></div>`;
         snapshot.forEach((doc) => {
             let item = doc.data();
             let div = document.createElement('div');
@@ -1236,7 +1290,7 @@ function subscribeStudentRealtimeData() {
     });
 }
 
-// --- TEACHER MANAGEMENT PANEL WITH SUB-TAB STRUCTURE ---
+// --- TEACHER MANAGEMENT PANEL ---
 function renderTeacherSessionPanel() {
     let panel = document.getElementById('teacherSessionPanel');
     panel.innerHTML = `
@@ -1246,8 +1300,8 @@ function renderTeacherSessionPanel() {
         <div id="secRoster_${currentTeacherSession}">
             <div class="admin-card">
                 <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#38bdf8;">📥 Bulk Import Roster (${currentTeacherSession})</h4>
-                <p style="font-size:10.5px; color:#94a3b8; margin-bottom:6px;">Format: RollNo, Name (one student per line)<br>Example: <span style="color:#f8fafc;">101, Fatima</span></p>
-                <textarea id="bulkRosterInput_${currentTeacherSession}" rows="3" placeholder="101, Fatima&#10;102, Maryam&#10;103, Nazish"></textarea>
+                <p style="font-size:10.5px; color:#94a3b8; margin-bottom:6px;">Format: RollNo, Name, Gender (one per line)<br>Example: <span style="color:#f8fafc;">101, Fatima, female</span> or <span style="color:#f8fafc;">102, Ali, male</span></p>
+                <textarea id="bulkRosterInput_${currentTeacherSession}" rows="3" placeholder="101, Fatima, female&#10;102, Ali, male&#10;103, Maryam, female"></textarea>
                 <button onclick="bulkImportRosterFor('${currentTeacherSession}')">Import Roster List</button>
             </div>
 
@@ -1297,14 +1351,21 @@ function renderTeacherSessionPanel() {
             </div>
         </div>
 
-        <!-- Section 4: Moderation & Discussions -->
+        <!-- Section 4: Moderation & Discussions with Gender Toggle -->
         <div id="secChats_${currentTeacherSession}" class="hidden">
             <div class="admin-card">
-                <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#38bdf8;">💬 Student Discussions & Moderation (${currentTeacherSession})</h4>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h4 style="margin:0; font-size:13.5px; color:#38bdf8;">💬 Student Discussions Moderation</h4>
+                    <div style="display:flex; gap:6px;">
+                        <button id="tBtnBoys_${currentTeacherSession}" onclick="switchTeacherGenderChannel('male')" style="width:auto; padding:5px 10px; font-size:11px; margin-top:0; background:${currentTeacherGenderChannel==='male'?'#06b6d4':'rgba(30,41,59,0.8)'};">👦 Boys Forum</button>
+                        <button id="tBtnGirls_${currentTeacherSession}" onclick="switchTeacherGenderChannel('female')" style="width:auto; padding:5px 10px; font-size:11px; margin-top:0; background:${currentTeacherGenderChannel==='female'?'#ec4899':'rgba(30,41,59,0.8)'};">👧 Girls Forum</button>
+                    </div>
+                </div>
+
                 <div class="chat-box" id="teacherChatBox_${currentTeacherSession}">
                     <p style="color:#94a3b8; font-size:11.5px;">Loading discussions...</p>
                 </div>
-                <textarea id="teacherReplyInput_${currentTeacherSession}" rows="2" placeholder="Type response to students..."></textarea>
+                <textarea id="teacherReplyInput_${currentTeacherSession}" rows="2" placeholder="Type response to students in selected forum..."></textarea>
                 <button onclick="postTeacherReply('${currentTeacherSession}')">Send Teacher Response</button>
             </div>
         </div>
@@ -1312,6 +1373,23 @@ function renderTeacherSessionPanel() {
 
     subscribeTeacherRealtimeData(currentTeacherSession);
     switchTeacherSubTab(activeTeacherSubTab);
+}
+
+function switchTeacherGenderChannel(gender) {
+    currentTeacherGenderChannel = gender;
+    let bBtn = document.getElementById(`tBtnBoys_${currentTeacherSession}`);
+    let gBtn = document.getElementById(`tBtnGirls_${currentTeacherSession}`);
+
+    if (bBtn && gBtn) {
+        if (gender === 'male') {
+            bBtn.style.background = "#06b6d4";
+            gBtn.style.background = "rgba(30,41,59,0.8)";
+        } else {
+            gBtn.style.background = "#ec4899";
+            bBtn.style.background = "rgba(30,41,59,0.8)";
+        }
+    }
+    subscribeTeacherChatStream(currentTeacherSession);
 }
 
 function subscribeTeacherRealtimeData(sess) {
@@ -1324,10 +1402,12 @@ function subscribeTeacherRealtimeData(sess) {
         if (!snapshot.empty) {
             snapshot.forEach((docSnap) => {
                 let st = docSnap.data();
+                let g = (st.gender || 'male').toLowerCase();
+                let gBadge = g === 'female' ? '<span class="gender-badge-female">👧 Female</span>' : '<span class="gender-badge-male">👦 Male</span>';
                 let div = document.createElement('div');
                 div.style.cssText = "background:rgba(30,41,59,0.7); padding:8px 10px; border-radius:8px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center; font-size:11.5px;";
                 div.innerHTML = `
-                    <div><strong style="color:#38bdf8;">Roll No: ${st.roll}</strong> - ${st.name}</div>
+                    <div><strong style="color:#38bdf8;">Roll No: ${st.roll}</strong> - ${st.name} ${gBadge}</div>
                     <span style="color:#10b981; font-weight:600;">Active 🟢</span>
                 `;
                 container.appendChild(div);
@@ -1396,13 +1476,18 @@ function subscribeTeacherRealtimeData(sess) {
         }
     });
 
-    // 4. Discussion & Moderation Stream
+    subscribeTeacherChatStream(sess);
+}
+
+function subscribeTeacherChatStream(sess) {
     if(unsubscribeTeacherChats) unsubscribeTeacherChats();
+    const channelTag = `${sess}_${currentTeacherGenderChannel}`;
     const chatQ = window.fs.query(
         window.fs.collection(window.db, "chats"), 
-        window.fs.where("session", "==", sess),
+        window.fs.where("genderChannel", "==", channelTag),
         window.fs.orderBy("timestamp", "asc")
     );
+
     unsubscribeTeacherChats = window.fs.onSnapshot(chatQ, (snapshot) => {
         let chatBox = document.getElementById(`teacherChatBox_${sess}`);
         if (!chatBox) return;
@@ -1425,7 +1510,8 @@ function subscribeTeacherRealtimeData(sess) {
             });
             chatBox.scrollTop = chatBox.scrollHeight;
         } else {
-            chatBox.innerHTML = "<p style='color:#94a3b8; font-size:11.5px; text-align:center;'>No messages in this session forum yet.</p>";
+            let label = currentTeacherGenderChannel === 'female' ? 'Girls' : 'Boys';
+            chatBox.innerHTML = `<p style='color:#94a3b8; font-size:11.5px; text-align:center;'>No messages in ${label} forum for Session ${sess} yet.</p>`;
         }
     });
 }
@@ -1446,11 +1532,17 @@ async function bulkImportRosterFor(sess) {
         if (parts.length >= 2) {
             let roll = parts[0].trim();
             let name = parts[1].trim();
+            let gender = parts[2] ? parts[2].trim().toLowerCase() : 'female'; // Default to female if omitted
+
+            if (gender !== 'male' && gender !== 'female') {
+                gender = 'female';
+            }
 
             if (roll && name) {
                 await window.fs.setDoc(window.fs.doc(window.db, "roster", roll), {
                     name: name,
-                    session: sess
+                    session: sess,
+                    gender: gender
                 });
                 count++;
             }
@@ -1482,8 +1574,12 @@ async function postTeacherReply(sess) {
         return;
     }
 
+    const channelTag = `${sess}_${currentTeacherGenderChannel}`;
+
     await window.fs.addDoc(window.fs.collection(window.db, "chats"), {
         session: sess,
+        genderChannel: channelTag,
+        gender: currentTeacherGenderChannel,
         name: `Teacher (${teacherName})`,
         roll: "Staff",
         message: msg,
@@ -1491,7 +1587,7 @@ async function postTeacherReply(sess) {
     });
 
     replyInput.value = "";
-    showToast("Reply Posted!");
+    showToast(`Reply Posted to ${currentTeacherGenderChannel.toUpperCase()} Forum!`);
 }
 
 async function uploadPDFNoteFor(sess) {
@@ -1630,14 +1726,14 @@ function filterNotes() {
 async function trackDownload(pdfName) {
     showToast(`Downloading: ${pdfName}`);
     await window.fs.addDoc(window.fs.collection(window.db, "telemetry"), {
-        action: "download", name: studentName, roll: studentRoll, session: studentSession, pdfName: pdfName, timestamp: window.fs.serverTimestamp()
+        action: "download", name: studentName, roll: studentRoll, session: studentSession, gender: studentGender, pdfName: pdfName, timestamp: window.fs.serverTimestamp()
     });
 }
 
 async function trackView(pdfName) {
     showToast(`Opening: ${pdfName}`);
     await window.fs.addDoc(window.fs.collection(window.db, "telemetry"), {
-        action: "view", name: studentName, roll: studentRoll, session: studentSession, pdfName: pdfName, timestamp: window.fs.serverTimestamp()
+        action: "view", name: studentName, roll: studentRoll, session: studentSession, gender: studentGender, pdfName: pdfName, timestamp: window.fs.serverTimestamp()
     });
 }
 
@@ -1646,8 +1742,12 @@ async function postMessage() {
     let msg = msgInput.value.trim();
     if(!msg) return;
 
+    const channelTag = `${studentSession}_${studentGender}`;
+
     await window.fs.addDoc(window.fs.collection(window.db, "chats"), {
         session: studentSession,
+        genderChannel: channelTag,
+        gender: studentGender,
         name: studentName,
         roll: studentRoll,
         message: msg,
