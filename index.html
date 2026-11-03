@@ -544,15 +544,10 @@ button:active {
 <!-- Student Sign Up Screen -->
 <div id="signUpDiv">
     <h3 style="font-size:16px; margin-bottom:8px;">Student Account Registration</h3>
-    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your Name, Roll No, and Session to create a password.</p>
+    <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">Enter your Name and Official Roll No to create a password.</p>
     
-    <input id="signupName" placeholder="Full Student Name">
+    <input id="signupName" placeholder="Full Student Name (as per roster)">
     <input id="signupRoll" placeholder="Official Roll No (e.g., 101)">
-    <select id="signupSession" style="background: rgba(30, 41, 59, 0.9); color:#f8fafc;">
-        <option value="2026-27">Session 2026-27</option>
-        <option value="2025-26">Session 2025-26</option>
-        <option value="2024-25">Session 2024-25</option>
-    </select>
     <input type="password" id="signupPass" placeholder="Create Password">
     <input type="password" id="signupConfirmPass" placeholder="Re-enter Password">
     <button id="signupBtn" onclick="signUpStudent()">Create Account</button>
@@ -693,7 +688,6 @@ let currentTeacherSession = "2026-27";
 let allNotesData = [];
 let activeTab = "notes";
 
-// Active Unsubscribe Listeners for Realtime Firestore
 let unsubscribeNotes = null;
 let unsubscribeNotices = null;
 let unsubscribeChats = null;
@@ -709,6 +703,14 @@ function showToast(msg) {
 function updateCharCount() {
     let len = document.getElementById('msgInput').value.length;
     document.getElementById('charNum').innerText = len;
+}
+
+// Client-side secure SHA-256 password hashing
+async function hashPassword(password) {
+    const msgBuffer = new TextEncoder().encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 window.onload = function() {
@@ -779,11 +781,10 @@ function backToStudentLogin() {
     showStudentSignUp();
 }
 
-// --- STUDENT AUTHENTICATION (FIRESTORE) ---
+// --- SECURE STUDENT REGISTRATION WITH ROSTER CHECK ---
 async function signUpStudent() {
     let name = document.getElementById('signupName').value.trim();
     let roll = document.getElementById('signupRoll').value.trim();
-    let session = document.getElementById('signupSession').value;
     let pass = document.getElementById('signupPass').value.trim();
     let confirmPass = document.getElementById('signupConfirmPass').value.trim();
 
@@ -798,41 +799,60 @@ async function signUpStudent() {
     }
 
     let btn = document.getElementById('signupBtn');
-    btn.innerText = "Creating Account...";
+    btn.innerText = "Verifying Roster...";
     btn.disabled = true;
 
     try {
-        const studentRef = window.fs.doc(window.db, "students", roll);
-        const docSnap = await window.fs.getDoc(studentRef);
+        // 1. Verify Roll Number exists in official Roster
+        const rosterRef = window.fs.doc(window.db, "roster", roll);
+        const rosterSnap = await window.fs.getDoc(rosterRef);
 
-        if (docSnap.exists()) {
-            showToast("Account with this Roll No already exists! Please log in.");
+        if (!rosterSnap.exists()) {
+            showToast("Access Denied: Roll No not found in official college roster.");
             btn.innerText = "Create Account";
             btn.disabled = false;
             return;
         }
 
+        const rosterData = rosterSnap.data();
+        const assignedSession = rosterData.session || "2026-27";
+
+        // 2. Check if account already exists
+        const studentRef = window.fs.doc(window.db, "students", roll);
+        const docSnap = await window.fs.getDoc(studentRef);
+
+        if (docSnap.exists()) {
+            showToast("Account already exists for this Roll No! Please log in.");
+            btn.innerText = "Create Account";
+            btn.disabled = false;
+            return;
+        }
+
+        // 3. Hash password for absolute security
+        const hashedPass = await hashPassword(pass);
+
         await window.fs.setDoc(studentRef, {
             name: name,
             roll: roll,
-            session: session,
-            pass: pass,
+            session: assignedSession,
+            pass: hashedPass,
             createdAt: window.fs.serverTimestamp()
         });
 
         btn.innerText = "Create Account";
         btn.disabled = false;
-        showToast(`Account Created for Session ${session}! Please log in.`);
+        showToast(`Account Created for Session ${assignedSession}! Please log in.`);
         document.getElementById('roll').value = roll;
         showStudentLogin();
     } catch (e) {
         console.error(e);
         btn.innerText = "Create Account";
         btn.disabled = false;
-        showToast("Failed to create account. Try again.");
+        showToast("Connection error. Try again.");
     }
 }
 
+// --- SECURE STUDENT LOGIN ---
 async function loginPortal() {
     let rollInput = document.getElementById('roll').value.trim();
     let passInput = document.getElementById('loginPass').value.trim();
@@ -850,7 +870,9 @@ async function loginPortal() {
         const studentRef = window.fs.doc(window.db, "students", rollInput);
         const docSnap = await window.fs.getDoc(studentRef);
 
-        if (docSnap.exists() && docSnap.data().pass === passInput) {
+        const hashedInputPass = await hashPassword(passInput);
+
+        if (docSnap.exists() && docSnap.data().pass === hashedInputPass) {
             const data = docSnap.data();
             studentName = data.name;
             studentRoll = data.roll;
@@ -889,7 +911,7 @@ function logoutPortal() {
     location.reload();
 }
 
-// --- TEACHER AUTHENTICATION (FIRESTORE) ---
+// --- TEACHER AUTHENTICATION ---
 async function signUpTeacher() {
     let name = document.getElementById('adminSignUpName').value.trim();
     let pass = document.getElementById('adminSignUpPass').value.trim();
@@ -910,10 +932,11 @@ async function signUpTeacher() {
     btn.disabled = true;
 
     try {
+        const hashedTeacherPass = await hashPassword(pass);
         const teacherRef = window.fs.doc(window.db, "teachers", name);
         await window.fs.setDoc(teacherRef, {
             name: name,
-            pass: pass,
+            pass: hashedTeacherPass,
             createdAt: window.fs.serverTimestamp()
         });
 
@@ -947,7 +970,9 @@ async function verifyAdminLogin() {
         const teacherRef = window.fs.doc(window.db, "teachers", name);
         const docSnap = await window.fs.getDoc(teacherRef);
 
-        if (docSnap.exists() && docSnap.data().pass === pass) {
+        const hashedInputPass = await hashPassword(pass);
+
+        if (docSnap.exists() && docSnap.data().pass === hashedInputPass) {
             teacherName = name;
             localStorage.setItem('mach_teacher_name', teacherName);
             document.getElementById('teacherWelcome').innerText = `🛠️ Welcome, ${teacherName}`;
@@ -1016,7 +1041,6 @@ function switchTab(tab) {
 
 // --- REALTIME DATA LISTENERS (STUDENT) ---
 function subscribeStudentRealtimeData() {
-    // 1. Study Notes Realtime Stream
     const notesQuery = window.fs.query(
         window.fs.collection(window.db, "notes"), 
         window.fs.where("session", "==", studentSession)
@@ -1029,7 +1053,6 @@ function subscribeStudentRealtimeData() {
         renderNotes(allNotesData);
     });
 
-    // 2. Campus Notices Realtime Stream
     const noticesQuery = window.fs.query(
         window.fs.collection(window.db, "notices"), 
         window.fs.where("session", "==", studentSession)
@@ -1050,7 +1073,6 @@ function subscribeStudentRealtimeData() {
         }
     });
 
-    // 3. Discussion Live Stream
     const chatQuery = window.fs.query(
         window.fs.collection(window.db, "chats"), 
         window.fs.where("session", "==", studentSession),
@@ -1070,11 +1092,25 @@ function subscribeStudentRealtimeData() {
     });
 }
 
-// --- TEACHER MANAGEMENT PANEL & REALTIME LISTENERS ---
+// --- TEACHER MANAGEMENT PANEL & BULK ROSTER IMPORTER ---
 function renderTeacherSessionPanel() {
     let panel = document.getElementById('teacherSessionPanel');
     panel.innerHTML = `
         <div style="margin-bottom:12px; font-size:14px; color:#38bdf8; font-weight:700;">Managing Session: ${currentTeacherSession}</div>
+
+        <!-- Bulk Student Roster Importer -->
+        <div class="admin-card">
+            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">📥 Bulk Import Roster (${currentTeacherSession})</h4>
+            <p style="font-size:11px; color:#94a3b8; margin-bottom:8px;">Format: RollNo, Name (one student per line)<br>Example: <span style="color:#f8fafc;">101, Fatima</span></p>
+            <textarea id="bulkRosterInput_${currentTeacherSession}" rows="3" placeholder="101, Fatima&#10;102, Maryam&#10;103, Nazish"></textarea>
+            <button onclick="bulkImportRosterFor('${currentTeacherSession}')">Import Roster List</button>
+        </div>
+
+        <!-- Registered Student Accounts Viewer -->
+        <div class="admin-card">
+            <h4 style="margin:0 0 10px 0; font-size:14px; color:#38bdf8;">👥 Registered Student Accounts (${currentTeacherSession})</h4>
+            <div id="registeredStudentsContainer_${currentTeacherSession}"><p style="color:#94a3b8; font-size:12px;">Loading registered students...</p></div>
+        </div>
 
         <!-- Direct PDF Upload Section -->
         <div class="admin-card">
@@ -1129,7 +1165,29 @@ function renderTeacherSessionPanel() {
 }
 
 function subscribeTeacherRealtimeData(sess) {
-    // 1. Manage Notes Stream
+    // 1. Registered Students Stream
+    const studentsQ = window.fs.query(window.fs.collection(window.db, "students"), window.fs.where("session", "==", sess));
+    window.fs.onSnapshot(studentsQ, (snapshot) => {
+        let container = document.getElementById(`registeredStudentsContainer_${sess}`);
+        if (!container) return;
+        container.innerHTML = "";
+        if (!snapshot.empty) {
+            snapshot.forEach((docSnap) => {
+                let st = docSnap.data();
+                let div = document.createElement('div');
+                div.style.cssText = "background:rgba(30,41,59,0.7); padding:8px 12px; border-radius:8px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; font-size:12px;";
+                div.innerHTML = `
+                    <div><strong style="color:#38bdf8;">Roll No: ${st.roll}</strong> - ${st.name}</div>
+                    <span style="color:#10b981; font-weight:600;">Account Active 🟢</span>
+                `;
+                container.appendChild(div);
+            });
+        } else {
+            container.innerHTML = "<p style='color:#94a3b8; font-size:12px;'>No student accounts registered for this session yet.</p>";
+        }
+    });
+
+    // 2. Manage Notes Stream
     const notesQ = window.fs.query(window.fs.collection(window.db, "notes"), window.fs.where("session", "==", sess));
     window.fs.onSnapshot(notesQ, (snapshot) => {
         let container = document.getElementById(`manageNotesContainer_${sess}`);
@@ -1159,7 +1217,7 @@ function subscribeTeacherRealtimeData(sess) {
         }
     });
 
-    // 2. Manage Notices Stream
+    // 3. Manage Notices Stream
     const noticesQ = window.fs.query(window.fs.collection(window.db, "notices"), window.fs.where("session", "==", sess));
     window.fs.onSnapshot(noticesQ, (snapshot) => {
         let container = document.getElementById(`manageNoticesContainer_${sess}`);
@@ -1188,7 +1246,7 @@ function subscribeTeacherRealtimeData(sess) {
         }
     });
 
-    // 3. Discussion & Teacher Chat Stream
+    // 4. Discussion & Teacher Chat Stream
     if(unsubscribeTeacherChats) unsubscribeTeacherChats();
     const chatQ = window.fs.query(
         window.fs.collection(window.db, "chats"), 
@@ -1214,7 +1272,37 @@ function subscribeTeacherRealtimeData(sess) {
     });
 }
 
-// --- ACTION & CRUD FUNCTIONS (FIRESTORE) ---
+// --- BULK ROSTER IMPORTER FUNCTION ---
+async function bulkImportRosterFor(sess) {
+    let inputVal = document.getElementById(`bulkRosterInput_${sess}`).value.trim();
+    if (!inputVal) {
+        showToast("Please paste student records!");
+        return;
+    }
+
+    let lines = inputVal.split('\n');
+    let count = 0;
+
+    for (let line of lines) {
+        let parts = line.split(',');
+        if (parts.length >= 2) {
+            let roll = parts[0].trim();
+            let name = parts[1].trim();
+
+            if (roll && name) {
+                await window.fs.setDoc(window.fs.doc(window.db, "roster", roll), {
+                    name: name,
+                    session: sess
+                });
+                count++;
+            }
+        }
+    }
+    showToast(`Successfully imported ${count} students to Session ${sess}!`);
+    document.getElementById(`bulkRosterInput_${sess}`).value = "";
+}
+
+// --- ACTION & CRUD FUNCTIONS ---
 async function postTeacherReply(sess) {
     let replyInput = document.getElementById(`teacherReplyInput_${sess}`);
     let msg = replyInput.value.trim();
@@ -1305,11 +1393,7 @@ async function editNotePrompt(id, encTitle, encInfo, encLink) {
     let newLink = prompt("Edit Note Link:", link);
 
     const docRef = window.fs.doc(window.db, "notes", id);
-    await window.fs.updateDoc(docRef, {
-        title: newTitle,
-        info: newInfo,
-        link: newLink
-    });
+    await window.fs.updateDoc(docRef, { title: newTitle, info: newInfo, link: newLink });
     showToast("Note Updated Successfully!");
 }
 
@@ -1331,11 +1415,7 @@ async function editNoticePrompt(id, encTitle, encDate, encContent) {
     let newContent = prompt("Edit Notice Content:", content);
 
     const docRef = window.fs.doc(window.db, "notices", id);
-    await window.fs.updateDoc(docRef, {
-        title: newTitle,
-        date: newDate,
-        content: newContent
-    });
+    await window.fs.updateDoc(docRef, { title: newTitle, date: newDate, content: newContent });
     showToast("Notice Updated Successfully!");
 }
 
