@@ -637,7 +637,7 @@ button:active {
 .sheet-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 580px;
+    min-width: 640px;
     font-size: 11.5px;
 }
 
@@ -1354,16 +1354,16 @@ function renderTeacherSessionPanel() {
                 <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#38bdf8;">📥 Bulk Import Roster (${currentTeacherSession})</h4>
                 <p style="font-size:10.5px; color:#94a3b8; margin-bottom:6px;">Format: RollNo, Name, Gender (one per line)<br>Example: <span style="color:#f8fafc;">101, Fatima, female</span> or <span style="color:#f8fafc;">102, Ali, male</span></p>
                 <textarea id="bulkRosterInput_${currentTeacherSession}" rows="3" placeholder="101, Fatima, female&#10;102, Ali, male&#10;103, Maryam, female"></textarea>
-                <button onclick="bulkImportRosterFor('${currentTeacherSession}')">Import Roster List</button>
+                <button onclick="bulkImportRosterFor('${currentTeacherSession}')">Import Roster to Session ${currentTeacherSession}</button>
             </div>
 
             <!-- Sheet-Style Registered Students Panel -->
             <div class="admin-card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <h4 style="margin:0; font-size:13.5px; color:#38bdf8;">📊 Registered Accounts Spreadsheet</h4>
+                    <h4 style="margin:0; font-size:13.5px; color:#38bdf8;">📊 Registered Accounts Spreadsheet (${currentTeacherSession})</h4>
                     <span id="totalStudentsBadge_${currentTeacherSession}" style="font-size:11px; background:rgba(6,182,212,0.2); color:#38bdf8; padding:3px 8px; border-radius:6px; border:1px solid rgba(6,182,212,0.4); font-weight:600;">Loading...</span>
                 </div>
-                <p style="font-size:10.5px; color:#94a3b8; margin-bottom:8px;">Scroll horizontally to view passwords, change sessions, or block/delete dropped students.</p>
+                <p style="font-size:10.5px; color:#94a3b8; margin-bottom:8px;">Scroll horizontally to view passwords, change gender, edit sessions, or block accounts.</p>
                 
                 <div class="sheet-container">
                     <table class="sheet-table">
@@ -1378,7 +1378,7 @@ function renderTeacherSessionPanel() {
                             </tr>
                         </thead>
                         <tbody id="registeredStudentsTable_${currentTeacherSession}">
-                            <tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:12px;">Loading registered students...</td></tr>
+                            <tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:12px;">Loading registered students for ${currentTeacherSession}...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1467,29 +1467,28 @@ function switchTeacherGenderChannel(gender) {
 }
 
 function subscribeTeacherRealtimeData(sess) {
-    // 1. All Registered Students Stream (Spreadsheet View with Passwords & Session Edit)
+    // 1. Registered Students Stream (Filtered Strictly by the Active Session)
     if(unsubscribeAllStudents) unsubscribeAllStudents();
-    const allStudentsQ = window.fs.collection(window.db, "students");
+    const activeStudentsQ = window.fs.query(
+        window.fs.collection(window.db, "students"),
+        window.fs.where("session", "==", sess)
+    );
     
-    unsubscribeAllStudents = window.fs.onSnapshot(allStudentsQ, (snapshot) => {
+    unsubscribeAllStudents = window.fs.onSnapshot(activeStudentsQ, (snapshot) => {
         let tableBody = document.getElementById(`registeredStudentsTable_${sess}`);
         let badge = document.getElementById(`totalStudentsBadge_${sess}`);
         if (!tableBody) return;
         
         tableBody.innerHTML = "";
-        let totalCount = 0;
-        let sessionCount = 0;
+        let sessionCount = snapshot.size;
 
         if (!snapshot.empty) {
             snapshot.forEach((docSnap) => {
-                totalCount++;
                 let st = docSnap.data();
                 let roll = docSnap.id;
-                let studentSess = st.session || "2026-27";
+                let studentSess = st.session || sess;
                 let gender = (st.gender || "male").toLowerCase();
                 let pass = st.pass || "N/A";
-
-                if (studentSess === sess) sessionCount++;
 
                 let gBadge = gender === 'female' ? '<span class="gender-badge-female">👧 Female</span>' : '<span class="gender-badge-male">👦 Male</span>';
 
@@ -1504,9 +1503,10 @@ function subscribeTeacherRealtimeData(sess) {
                     <td>${gBadge}</td>
                     <td>
                         <div style="display:flex; gap:4px;">
-                            <button class="btn-small btn-edit" style="padding:4px 8px; font-size:10px; margin-top:0;" onclick="changeStudentPasswordPrompt('${roll}', '${encodeURIComponent(st.name)}', '${encodeURIComponent(pass)}')">🔑 Edit Pass</button>
-                            <button class="btn-small btn-view" style="padding:4px 8px; font-size:10px; margin-top:0;" onclick="moveStudentSessionPrompt('${roll}', '${encodeURIComponent(st.name)}', '${studentSess}')">🔄 Move Session</button>
-                            <button class="btn-small btn-delete" style="padding:4px 8px; font-size:10px; margin-top:0;" onclick="deleteStudentAccount('${roll}', '${encodeURIComponent(st.name)}')">🗑️ Block / Delete</button>
+                            <button class="btn-small btn-edit" style="padding:4px 8px; font-size:10px; margin-top:0;" onclick="changeStudentPasswordPrompt('${roll}', '${encodeURIComponent(st.name)}', '${encodeURIComponent(pass)}')">🔑 Pass</button>
+                            <button class="btn-small btn-edit" style="padding:4px 8px; font-size:10px; margin-top:0; background:rgba(236,72,153,0.2); color:#f472b6; border-color:rgba(236,72,153,0.4);" onclick="toggleStudentGender('${roll}', '${encodeURIComponent(st.name)}', '${gender}')">👫 Gender</button>
+                            <button class="btn-small btn-view" style="padding:4px 8px; font-size:10px; margin-top:0;" onclick="moveStudentSessionPrompt('${roll}', '${encodeURIComponent(st.name)}', '${studentSess}')">🔄 Move</button>
+                            <button class="btn-small btn-delete" style="padding:4px 8px; font-size:10px; margin-top:0;" onclick="deleteStudentAccount('${roll}', '${encodeURIComponent(st.name)}')">🗑️ Block</button>
                         </div>
                     </td>
                 `;
@@ -1514,11 +1514,11 @@ function subscribeTeacherRealtimeData(sess) {
             });
 
             if (badge) {
-                badge.innerText = `Total: ${totalCount} | Session ${sess}: ${sessionCount}`;
+                badge.innerText = `Session ${sess}: ${sessionCount} Registered`;
             }
         } else {
-            tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:12px;">No registered student accounts in database.</td></tr>`;
-            if (badge) badge.innerText = `Total: 0`;
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:12px;">No registered student accounts in Session ${sess}.</td></tr>`;
+            if (badge) badge.innerText = `Session ${sess}: 0 Registered`;
         }
     });
 
@@ -1597,6 +1597,27 @@ async function changeStudentPasswordPrompt(roll, encName, currentPass) {
     } catch (e) {
         console.error(e);
         showToast("Error updating password.");
+    }
+}
+
+async function toggleStudentGender(roll, encName, currentGender) {
+    let name = decodeURIComponent(encName);
+    let newGender = currentGender.toLowerCase() === 'female' ? 'male' : 'female';
+
+    try {
+        const studentRef = window.fs.doc(window.db, "students", roll);
+        await window.fs.updateDoc(studentRef, { gender: newGender });
+
+        const rosterRef = window.fs.doc(window.db, "roster", roll);
+        const rosterSnap = await window.fs.getDoc(rosterRef);
+        if (rosterSnap.exists()) {
+            await window.fs.updateDoc(rosterRef, { gender: newGender });
+        }
+
+        showToast(`Gender updated to ${newGender.toUpperCase()} for ${name}!`);
+    } catch (e) {
+        console.error(e);
+        showToast("Error updating student gender.");
     }
 }
 
@@ -1713,6 +1734,7 @@ async function bulkImportRosterFor(sess) {
             }
 
             if (roll && name) {
+                // Forces enrollment strictly into the active teacher session tab (sess)
                 await window.fs.setDoc(window.fs.doc(window.db, "roster", roll), {
                     name: name,
                     session: sess,
